@@ -5,12 +5,11 @@ pub fn part_one(input: &str) -> Option<u32> {
         .split("\n\n")
         .collect::<Vec<&str>>()
         .iter()
-        .map(|elf| {
+        .filter_map(|elf| {
             elf.split('\n')
                 .filter_map(|calories| calories.parse::<u32>().ok())
                 .sum1::<u32>()
         })
-        .flatten()
         .max()
 }
 
@@ -19,12 +18,11 @@ pub fn part_two(input: &str) -> Option<u32> {
         .split("\n\n")
         .collect::<Vec<&str>>()
         .iter()
-        .map(|elf| {
+        .filter_map(|elf| {
             elf.split('\n')
                 .filter_map(|calories| calories.parse::<u32>().ok())
                 .sum1::<u32>()
         })
-        .flatten()
         .sorted()
         .rev()
         .take(3)
