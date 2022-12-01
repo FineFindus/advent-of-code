@@ -7,28 +7,28 @@ pub fn part_one(input: &str) -> Option<u32> {
         .iter()
         .map(|elf| {
             elf.split('\n')
-                .map(|calories| calories.parse::<u32>().unwrap_or(0))
-                .sum::<u32>()
+                .filter_map(|calories| calories.parse::<u32>().ok())
+                .sum1::<u32>()
         })
+        .flatten()
         .max()
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    Some(
-        input
-            .split("\n\n")
-            .collect::<Vec<&str>>()
-            .iter()
-            .map(|elf| {
-                elf.split('\n')
-                    .map(|calories| calories.parse::<u32>().unwrap_or(0))
-                    .sum::<u32>()
-            })
-            .sorted()
-            .rev()
-            .take(3)
-            .sum(),
-    )
+    input
+        .split("\n\n")
+        .collect::<Vec<&str>>()
+        .iter()
+        .map(|elf| {
+            elf.split('\n')
+                .filter_map(|calories| calories.parse::<u32>().ok())
+                .sum1::<u32>()
+        })
+        .flatten()
+        .sorted()
+        .rev()
+        .take(3)
+        .sum1()
 }
 
 fn main() {
