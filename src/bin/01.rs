@@ -1,9 +1,34 @@
+use itertools::Itertools;
+
 pub fn part_one(input: &str) -> Option<u32> {
-    None
+    input
+        .split("\n\n")
+        .collect::<Vec<&str>>()
+        .iter()
+        .map(|elf| {
+            elf.split('\n')
+                .map(|calories| calories.parse::<u32>().unwrap_or(0))
+                .sum::<u32>()
+        })
+        .max()
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    None
+    Some(
+        input
+            .split("\n\n")
+            .collect::<Vec<&str>>()
+            .iter()
+            .map(|elf| {
+                elf.split('\n')
+                    .map(|calories| calories.parse::<u32>().unwrap_or(0))
+                    .sum::<u32>()
+            })
+            .sorted()
+            .rev()
+            .take(3)
+            .sum(),
+    )
 }
 
 fn main() {
