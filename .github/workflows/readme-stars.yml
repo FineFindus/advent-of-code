@@ -2,7 +2,7 @@ name: Update readme ⭐️ progress
 
 on:
   push:
-    branches: [master]
+    branches: [main]
     # schedule:
     #     - cron: "51 */6 * * *" # Every 6 hours
     workflow_dispatch:
