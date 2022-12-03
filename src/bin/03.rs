@@ -36,18 +36,20 @@ pub fn part_two(input: &str) -> Option<u32> {
         .chunks(3)
         .into_iter()
         .filter_map(|mut lines| {
-            let mut alphabet: u64 = 0;
-            for char in lines.next().unwrap().bytes() {
-                alphabet |= 1 << alphabet_index_of(char);
+            let (mut a, mut b) = (064, 0u64);
+            for (first, second) in lines
+                .next()
+                .unwrap()
+                .bytes()
+                .zip(lines.next().unwrap().bytes())
+            {
+                a |= 1 << alphabet_index_of(first);
+                b |= 1 << alphabet_index_of(second);
             }
-            let mut second: u64 = 0;
-            for char in lines.next().unwrap().bytes() {
-                second |= 1 << alphabet_index_of(char);
-            }
-            alphabet &= second;
+            a &= b;
             let mut item = None;
             for char in lines.next().unwrap().bytes() {
-                if (alphabet >> alphabet_index_of(char)) & 1 == 1 {
+                if (a >> alphabet_index_of(char)) & 1 == 1 {
                     item = Some(char);
                     break;
                 }
