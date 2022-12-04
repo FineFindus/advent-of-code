@@ -6,8 +6,7 @@ pub fn part_one(input: &str) -> Option<u32> {
             .lines()
             .filter_map(|line| {
                 line.split(',')
-                    .map(|sections| sections.split('-').collect_vec())
-                    .flatten()
+                    .flat_map(|sections| sections.split('-').collect_vec())
                     .filter_map(|section| section.parse::<u32>().ok())
                     .collect_tuple::<(u32, u32, u32, u32)>()
             })
@@ -25,13 +24,11 @@ pub fn part_two(input: &str) -> Option<u32> {
             .lines()
             .filter_map(|line| {
                 line.split(',')
-                    .map(|sections| sections.split('-').collect_vec())
-                    .flatten()
+                    .flat_map(|sections| sections.split('-').collect_vec())
                     .filter_map(|section| section.parse::<u32>().ok())
                     .collect_tuple::<(u32, u32, u32, u32)>()
             })
-            .filter(|sections| (sections.1 >= sections.2 && !(sections.0 > sections.3)))
-            .inspect(|item| println!("{:?}", item))
+            .filter(|sections| (sections.1 >= sections.2 && sections.0 <= sections.3))
             .count() as u32,
     )
 }

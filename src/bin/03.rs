@@ -36,7 +36,7 @@ pub fn part_two(input: &str) -> Option<u32> {
         .chunks(3)
         .into_iter()
         .filter_map(|mut lines| {
-            let (mut a, mut b) = (064, 0u64);
+            let (mut a, mut b) = (0u64, 0u64);
             for (first, second) in lines
                 .next()
                 .unwrap()
