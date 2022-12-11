@@ -1,6 +1,6 @@
 enum Instruction {
     NoOp,
-    AddX(isize),
+    Add(isize),
 }
 
 pub fn incrase_clock_cycle(clock: &mut usize, reg: isize, result_sum: &mut isize) {
@@ -15,27 +15,22 @@ pub fn part_one(input: &str) -> Option<u32> {
     let mut clock = 1;
     let mut result_sum = 0;
 
-    let mut instructions = input.lines().filter_map(|line| match line.as_bytes()[0] {
+    input.lines().filter_map(|line| match line.as_bytes()[0] {
         b'n' => Some(Instruction::NoOp),
-        b'a' => Some(Instruction::AddX(
+        b'a' => Some(Instruction::Add(
             line.split_once(' ').unwrap().1.parse::<isize>().unwrap(),
         )),
         _ => None,
-    });
-
-    loop {
-        match instructions.next() {
-            Some(Instruction::NoOp) => incrase_clock_cycle(&mut clock, register, &mut result_sum),
-            Some(Instruction::AddX(value)) => {
+    }).for_each(|instruction| {
+        match instruction {
+            Instruction::NoOp => incrase_clock_cycle(&mut clock, register, &mut result_sum),
+            Instruction::Add(value) => {
                 incrase_clock_cycle(&mut clock, register, &mut result_sum);
                 incrase_clock_cycle(&mut clock, register, &mut result_sum);
                 register += value;
             }
-            None => {
-                break;
-            }
         }
-    }
+    });
 
     Some(result_sum as u32)
 }
@@ -56,32 +51,24 @@ pub fn part_two(input: &str) -> Option<String> {
 
     let mut screen = vec![b'.'; 40 * 6];
 
-    let mut instructions = input.lines().filter_map(|line| match line.as_bytes()[0] {
+    input.lines().filter_map(|line| match line.as_bytes()[0] {
         b'n' => Some(Instruction::NoOp),
-        b'a' => Some(Instruction::AddX(
+        b'a' => Some(Instruction::Add(
             line.split_once(' ').unwrap().1.parse::<isize>().unwrap(),
         )),
         _ => None,
-    });
-
-    loop {
-        match instructions.next() {
-            Some(Instruction::NoOp) => {
+    }).for_each(|instruction| {
+        match instruction {
+            Instruction::NoOp => {
                 incrase_clock_cycle_screen(&mut clock, register, &mut screen)
             }
-            Some(Instruction::AddX(value)) => {
+            Instruction::Add(value) => {
                 incrase_clock_cycle_screen(&mut clock, register, &mut screen);
                 incrase_clock_cycle_screen(&mut clock, register, &mut screen);
                 register += value;
             }
-            None => {
-                break;
-            }
         }
-        if clock >= 240 {
-            break;
-        }
-    }
+    });
 
     for i in 1..6 {
         screen.insert(40 * i + i - 1, b'\n');
