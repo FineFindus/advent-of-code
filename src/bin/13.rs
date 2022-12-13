@@ -61,7 +61,7 @@ pub fn part_two(input: &str) -> Option<u32> {
     let mut packets = input
         .lines()
         .filter(|line| !line.trim().is_empty())
-        .map( parse)
+        .map(parse)
         .collect_vec();
 
     let divider_1 = parse("[[2]]");
