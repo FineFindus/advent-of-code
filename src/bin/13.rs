@@ -69,7 +69,7 @@ pub fn part_two(input: &str) -> Option<u32> {
 
     packets.push(divider_1.clone());
     packets.push(divider_2.clone());
-    
+
     packets.sort_unstable();
 
     Some(
