@@ -22,3 +22,4 @@ Go to the _Secrets_ tab in your repository settings and create the following sec
 
  - `AOC_USER_ID`: Go to [the settings](https://adventofcode.com/settings) and copy the user id. It's the number behind the `#` symbol in the first name option. Example: `3031`
  - `AOC_SESSION`: an active session. [See how to install `aoc-cli` on how to get session cookie](#installing-aoc-cli)
+ - Set the workflow permission of actions to _Read and write_
