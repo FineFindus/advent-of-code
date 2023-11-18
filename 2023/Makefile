@@ -6,7 +6,7 @@ fmt:
 scaffold/%:
 	mkdir src/$*
 	# download input file
-	aoc --year 2022 -d $* --input-file ./src/$*/input.txt download
+	aoc --year 2023 -d $* --input-file ./src/$*/input.txt download
 	#create empty example file
 	touch src/$*/example.txt
 	#setup template file
