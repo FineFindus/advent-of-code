@@ -3,15 +3,21 @@ name: Update readme ⭐️ progress
 on:
   push:
     branches: [main]
+    # !Please set a different minute than 51 if you enable this!
     # schedule:
     #     - cron: "51 */6 * * *" # Every 6 hours
     workflow_dispatch:
 
 jobs:
     update-readme:
-        runs-on: ubuntu-latest
+      strategy:
+        matrix:
+          year: 
+            - 2022
+            - 2023
+      runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v3
               if: ${{ env.AOC_ENABLED }}
               env:
                   AOC_ENABLED: ${{ secrets.AOC_ENABLED }}
@@ -22,10 +28,11 @@ jobs:
               with:
                   userId: ${{ secrets.AOC_USER_ID }}
                   sessionCookie: ${{ secrets.AOC_SESSION }}
-                  year: ${{ secrets.AOC_YEAR }}
+                  year: ${{ matrix.year }}
+                  readmeLocation: ${{ matrix.year }}/README.md
             - uses: stefanzweifel/git-auto-commit-action@v4
               if: ${{ env.AOC_ENABLED }}
               env:
                   AOC_ENABLED: ${{ secrets.AOC_ENABLED }}
               with:
-                  commit_message: "update readme progess"
+                commit_message: "chore(${{ matrix.year }}): update readme progess"
