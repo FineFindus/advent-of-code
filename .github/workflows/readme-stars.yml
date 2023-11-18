@@ -16,23 +16,14 @@ jobs:
             - 2022
             - 2023
       runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v3
-              if: ${{ env.AOC_ENABLED }}
-              env:
-                  AOC_ENABLED: ${{ secrets.AOC_ENABLED }}
-            - uses: k2bd/advent-readme-stars@v1
-              if: ${{ env.AOC_ENABLED }}
-              env:
-                  AOC_ENABLED: ${{ secrets.AOC_ENABLED }}
-              with:
-                  userId: ${{ secrets.AOC_USER_ID }}
-                  sessionCookie: ${{ secrets.AOC_SESSION }}
-                  year: ${{ matrix.year }}
-                  readmeLocation: ${{ matrix.year }}/README.md
-            - uses: stefanzweifel/git-auto-commit-action@v4
-              if: ${{ env.AOC_ENABLED }}
-              env:
-                  AOC_ENABLED: ${{ secrets.AOC_ENABLED }}
-              with:
-                commit_message: "chore(${{ matrix.year }}): update readme progess"
+      steps:
+          - uses: actions/checkout@v3
+          - uses: k2bd/advent-readme-stars@v1
+            with:
+                userId: ${{ secrets.AOC_USER_ID }}
+                sessionCookie: ${{ secrets.AOC_SESSION }}
+                year: ${{ matrix.year }}
+                readmeLocation: ${{ matrix.year }}/README.md
+          - uses: stefanzweifel/git-auto-commit-action@v4
+            with:
+              commit_message: "chore(${{ matrix.year }}): update readme progess"

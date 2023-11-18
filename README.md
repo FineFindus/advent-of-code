@@ -20,7 +20,5 @@ Navigate to the leaderboard page of the desired year and click on _Private Leade
 
 Go to the _Secrets_ tab in your repository settings and create the following secrets:
 
- - `AOC_ENABLED`: Controls whether the workflow is enabled. Set it to `true` to enable the progress tracker.
  - `AOC_USER_ID`: Go to [the settings](https://adventofcode.com/settings) and copy the user id. It's the number behind the `#` symbol in the first name option. Example: `3031`
- - `AOC_YEAR`: the year you want to track. Example: `2022`
  - `AOC_SESSION`: an active session. [See how to install `aoc-cli` on how to get session cookie](#installing-aoc-cli)
