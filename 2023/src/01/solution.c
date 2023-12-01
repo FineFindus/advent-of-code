@@ -36,21 +36,69 @@ part_one (char *input)
         }
       sum += firstDigit * 10 + lastDigit;
     }
-  while ((p = strtok_r (NULL, "\n", &temp)) != NULL);
+  while ((line = strtok_r (NULL, "\n", &temp)) != NULL);
 
   return sum;
 }
 
 unsigned
+findValue (char *str)
+{
+  // try to find the substring value
+  const char digits[][7] = { "one", "two",   "three", "four", "five",
+                             "six", "seven", "eight", "nine" };
+
+  for (int i = 0; i < 9; i++)
+    {
+      int len = strlen (digits[i]);
+      if (strncmp (str, digits[i], len) == 0)
+        {
+          return i + 1;
+        }
+    }
+  // otherwise return the int value of the first char
+  if (isdigit (str[0]))
+    {
+      return str[0] - '0';
+    }
+  return 0;
+}
+
+unsigned
 part_two (char *input)
 {
-  return 0;
+  unsigned sum = 0;
+  char *line, *temp;
+  line = strtok_r (input, "\n", &temp);
+  do
+    {
+      unsigned firstDigit = 0, lastDigit = 0;
+      for (int i = 0; line[i] != 0; i++)
+        {
+          unsigned value = findValue (line + i);
+          if (value != 0)
+            {
+              if (firstDigit == 0)
+                {
+                  firstDigit = value;
+                  lastDigit = value;
+                }
+              else
+                {
+                  lastDigit = value;
+                }
+            }
+        }
+      sum += firstDigit * 10 + lastDigit;
+    }
+  while ((line = strtok_r (NULL, "\n", &temp)) != NULL);
+  return sum;
 }
 
 int
 main (int argc, char *argv[])
 {
-  test (part_one, 142, part_two, 0);
+  test (part_one, 142, part_two, 281);
   print_result (part_one);
   print_result (part_two);
   return EXIT_SUCCESS;
