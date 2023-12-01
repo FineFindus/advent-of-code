@@ -51,8 +51,8 @@ test (unsigned (*part_one) (char *), unsigned solution_one,
 #endif
 
   char *input = read_input (EXAMPLE_FILE_PATH);
-  assert (part_one (input) == 0);
-  assert (part_two (input) == 0);
+  assert (part_one (input) == solution_one);
+  assert (part_two (input) == solution_two);
 }
 
 void
