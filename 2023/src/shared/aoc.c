@@ -63,6 +63,8 @@ print_result (unsigned (*func) (char *))
 #else
   char *filename = INPUT_FILE_PATH;
 #endif
+static int part = 0;
+part++;
 
   struct timeval start, end;
 
@@ -70,7 +72,7 @@ print_result (unsigned (*func) (char *))
 
   char *input = read_input (filename);
   unsigned solution = func (input);
-  printf ("🎄 \x1b[1mPart 1\x1b[0m 🎄\n\n");
+  printf ("🎄 \x1b[1mPart %d\x1b[0m 🎄\n\n", part);
 
   gettimeofday (&end, NULL);
   long seconds = end.tv_sec - start.tv_sec;
