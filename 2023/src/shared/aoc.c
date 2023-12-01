@@ -58,11 +58,17 @@ test (unsigned (*part_one) (char *), unsigned solution_one,
 void
 print_result (unsigned (*func) (char *))
 {
+#ifdef TEST
+  char *filename = EXAMPLE_FILE_PATH;
+#else
+  char *filename = INPUT_FILE_PATH;
+#endif
+
   struct timeval start, end;
 
   gettimeofday (&start, NULL);
 
-  char *input = read_input (INPUT_FILE_PATH);
+  char *input = read_input (filename);
   unsigned solution = func (input);
   printf ("🎄 \x1b[1mPart 1\x1b[0m 🎄\n\n");
 
