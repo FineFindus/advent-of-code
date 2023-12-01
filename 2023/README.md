@@ -6,6 +6,8 @@ make scaffold/{day}
 make test/{day}
 # run solution
 make solve/{day}
+# debugging
+make gdb(-solve)/{day}
 ```
 
 <!--- advent_readme_stars table --->
