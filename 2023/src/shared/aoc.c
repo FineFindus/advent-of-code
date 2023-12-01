@@ -63,8 +63,8 @@ print_result (unsigned (*func) (char *))
 #else
   char *filename = INPUT_FILE_PATH;
 #endif
-static int part = 0;
-part++;
+  static int part = 0;
+  part++;
 
   struct timeval start, end;
 
