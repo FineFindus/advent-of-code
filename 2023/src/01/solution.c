@@ -10,14 +10,14 @@ unsigned
 part_one (char *input)
 {
   unsigned sum = 0;
-  char *p, *temp;
-  p = strtok_r (input, "\n", &temp);
+  char *line, *temp;
+  line = strtok_r (input, "\n", &temp);
   do
     {
       unsigned firstDigit = 0, lastDigit = 0;
-      for (int i = 0; p[i] != 0; i++)
+      for (int i = 0; line[i] != 0; i++)
         {
-          char c = p[i];
+          char c = line[i];
           if (isdigit (c))
             {
               if (firstDigit == 0)
