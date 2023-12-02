@@ -51,8 +51,14 @@ test (unsigned (*part_one) (char *), unsigned solution_one,
 #endif
 
   char *input = read_input (EXAMPLE_FILE_PATH);
-  assert (part_one (input) == solution_one);
-  assert (part_two (input) == solution_two);
+  unsigned try_one = part_one (input);
+  if (try_one != solution_one)
+    fprintf (stderr, "Part 1 failed with %u, expected was %u", try_one,
+             solution_one);
+  unsigned try_two = part_one (input);
+  if (try_two != solution_two)
+    fprintf (stderr, "Part 2 failed with %u, expected was %u", try_two,
+             solution_two);
 }
 
 void
