@@ -20,6 +20,8 @@ parse_set (char *str, int max_red, int max_green, int max_blue)
   char *set = strtok_r (NULL, ";", &temp);
   do
     {
+      if (set == NULL)
+        continue;
       int red = 0;
       int green = 0;
       int blue = 0;
