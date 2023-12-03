@@ -27,34 +27,31 @@ part_one (char *input)
           continue;
         }
 
-      if (isdigit (c))
+      if (!isdigit (c))
+        continue;
+
+      int part_number = atoi (input + i);
+      int part_num_len = floor (log10 (abs (part_number))) + 1;
+      // check characters around
+      for (int k = i - 1; k <= i + part_num_len; k++)
         {
-          int part_number = atoi (input + i);
-          if (part_number != 0)
+          for (int j = -1; j < 2; j++)
             {
-              int part_num_len = floor (log10 (abs (part_number))) + 1;
-              // check characters around
-              for (int k = i - 1; k <= i + part_num_len; k++)
-                {
-                  for (int j = -1; j < 2; j++)
-                    {
-                      int target_index = k + (j * line_len + j);
+              int target_index = k + (j * line_len + j);
 
-                      if (target_index < 0 || target_index > total_len)
-                        continue;
+              if (target_index < 0 || target_index > total_len)
+                continue;
 
-                      char check = input[target_index];
-                      if (check == '.' || check == '\n' || isdigit (check))
-                        continue;
+              char check = input[target_index];
+              if (check == '.' || check == '\n' || isdigit (check))
+                continue;
 
-                      sum += part_number;
-                      goto break_inner_loop;
-                    }
-                }
-            break_inner_loop:
-              i += part_num_len;
+              sum += part_number;
+              goto break_inner_loop;
             }
         }
+    break_inner_loop:
+      i += part_num_len;
     }
   return sum;
 }
