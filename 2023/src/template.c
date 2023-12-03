@@ -20,8 +20,7 @@ part_two (char *input)
 int
 main (int argc, char *argv[])
 {
-  test (part_one, 0, part_two, 0);
-  print_result (part_one);
-  print_result (part_two);
+  print_result (part_one, 0);
+  print_result (part_two, 0);
   return EXIT_SUCCESS;
 }

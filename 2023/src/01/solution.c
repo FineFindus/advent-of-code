@@ -98,8 +98,7 @@ part_two (char *input)
 int
 main (int argc, char *argv[])
 {
-  test (part_one, 142, part_two, 281);
-  print_result (part_one);
-  print_result (part_two);
+  print_result (part_one, 142);
+  print_result (part_two, 281);
   return EXIT_SUCCESS;
 }

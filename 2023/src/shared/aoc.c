@@ -43,26 +43,7 @@ read_input (const char *filename)
 }
 
 void
-test (unsigned (*part_one) (char *), unsigned solution_one,
-      unsigned (*part_two) (char *), unsigned solution_two)
-{
-#ifndef TEST
-  return;
-#endif
-
-  char *input = read_input (EXAMPLE_FILE_PATH);
-  unsigned try_one = part_one (input);
-  if (try_one != solution_one)
-    fprintf (stderr, "Part 1 failed with %u, expected was %u", try_one,
-             solution_one);
-  unsigned try_two = part_one (input);
-  if (try_two != solution_two)
-    fprintf (stderr, "Part 2 failed with %u, expected was %u", try_two,
-             solution_two);
-}
-
-void
-print_result (unsigned (*func) (char *))
+print_result (unsigned (*func) (char *), unsigned expected_result)
 {
 #ifdef TEST
   char *filename = EXAMPLE_FILE_PATH;
@@ -86,4 +67,14 @@ print_result (unsigned (*func) (char *))
   double elapsed = seconds + microseconds * 1e-6;
 
   printf ("%u \x1b[3m(Elapsed: %.2lfµs)\x1b[0m\n\n", solution, elapsed * 1e6);
+
+#ifdef TEST
+
+  if (solution != expected_result)
+    {
+      fprintf (stderr, "Part %d failed with %u, expected was %u\n\n", part,
+               solution, expected_result);
+    }
+
+#endif
 }
