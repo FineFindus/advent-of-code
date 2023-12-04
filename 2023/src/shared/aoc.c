@@ -45,10 +45,10 @@ read_input (const char *filename)
 void
 print_result (unsigned (*func) (char *), unsigned expected_result)
 {
-#ifdef TEST
-  char *filename = EXAMPLE_FILE_PATH;
-#else
+#ifdef SOLUTION
   char *filename = INPUT_FILE_PATH;
+#else
+  char *filename = EXAMPLE_FILE_PATH;
 #endif
   static int part = 0;
   part++;
@@ -68,7 +68,7 @@ print_result (unsigned (*func) (char *), unsigned expected_result)
 
   printf ("%u \x1b[3m(Elapsed: %.2lfµs)\x1b[0m\n\n", solution, elapsed * 1e6);
 
-#ifdef TEST
+#ifndef SOLUTION
 
   if (solution != expected_result)
     {

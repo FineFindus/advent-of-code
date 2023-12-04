@@ -13,13 +13,13 @@ scaffold/%:
 	cp src/template.c src/$*/solution.c
 
 test/%:
-	gcc -DDAY='"$*"' -D TEST ${CFLAGS} -o solution src/$*/solution.c src/shared/* && ./solution
-
-solve/%:
 	gcc -DDAY='"$*"' ${CFLAGS} -o solution src/$*/solution.c src/shared/* && ./solution
 
+solve/%:
+	gcc -DDAY='"$*"' -D SOLUTION ${CFLAGS} -o solution src/$*/solution.c src/shared/* && ./solution
+
 gdb/%:
-	gcc -DDAY='"$*"' -D TEST ${CFLAGS} -o solution -g src/$*/solution.c src/shared/* && gdb solution
+	gcc -DDAY='"$*"' ${CFLAGS} -o solution -g src/$*/solution.c src/shared/* && gdb solution
 
 gdb-solve/%:
-	gcc -DDAY='"$*"' ${CFLAGS} -o solution -g src/$*/solution.c src/shared/* && gdb solution
+	gcc -DDAY='"$*"' -D SOLUTION ${CFLAGS} -o solution -g src/$*/solution.c src/shared/* && gdb solution

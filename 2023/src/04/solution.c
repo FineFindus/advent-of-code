@@ -5,13 +5,13 @@
 #include <string.h>
 #include <time.h>
 
-#ifdef TEST
-#define WINNING_NUMBERS 5
-#define CARD_NUMBERS 8
-#else
+#ifdef SOLUTION
 #define WINNING_NUMBERS 10
 #define CARD_NUMBERS 25
-#endif /* ifdef TEST */
+#else
+#define WINNING_NUMBERS 5
+#define CARD_NUMBERS 8
+#endif
 
 void read_numbers (char **input, int *arr, char delim);
 
