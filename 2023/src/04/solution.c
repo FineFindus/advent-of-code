@@ -8,12 +8,15 @@
 #ifdef SOLUTION
 #define WINNING_NUMBERS 10
 #define CARD_NUMBERS 25
+#define CARDS 215
 #else
 #define WINNING_NUMBERS 5
 #define CARD_NUMBERS 8
+#define CARDS 6
 #endif
 
 void read_numbers (char **input, int *arr, char delim);
+int find_index (int *arr, int target, unsigned len);
 
 typedef struct
 {
@@ -45,6 +48,26 @@ card_new (char *input)
   read_numbers (&input, card.numbers, '\n');
 
   return card;
+}
+
+void
+card_calculate_points (Card card, Card *cards, int index, unsigned *card_sum)
+{
+  *card_sum += 1;
+  unsigned points = 0;
+  for (int i = 0; i < CARD_NUMBERS; i++)
+    {
+      int number = card.numbers[i];
+      int index = find_index (card.winning_numbers, number, WINNING_NUMBERS);
+      if (index != -1)
+        {
+          points++;
+        }
+    }
+  for (int i = 1; i <= points; i++)
+    {
+      card_calculate_points (cards[index + i], cards, index + i, card_sum);
+    }
 }
 
 void
@@ -117,13 +140,32 @@ part_one (char *input)
 unsigned
 part_two (char *input)
 {
-  return 0;
+  unsigned scratch_card_sum = 0;
+  Card cards[CARDS] = { 0 };
+
+  char *line, *temp;
+  line = strtok_r (input, "\n", &temp);
+  do
+    {
+      unsigned points = 0;
+      Card card = card_new (line);
+      cards[card.id - 1] = card;
+      scratch_card_sum += points;
+    }
+  while ((line = strtok_r (NULL, "\n", &temp)) != NULL);
+
+  for (int i = 0; i < CARDS; i++)
+    {
+      Card card = cards[i];
+      card_calculate_points (card, cards, i, &scratch_card_sum);
+    }
+  return scratch_card_sum;
 }
 
 int
 main (int argc, char *argv[])
 {
   print_result (part_one, 13);
-  print_result (part_two, 0);
+  print_result (part_two, 30);
   return EXIT_SUCCESS;
 }
