@@ -77,4 +77,5 @@ print_result (unsigned (*func) (char *), unsigned expected_result)
     }
 
 #endif
+  free (input);
 }
