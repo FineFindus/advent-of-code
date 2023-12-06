@@ -1,5 +1,6 @@
 #include "../shared/aoc.h"
 #include <ctype.h>
+#include <limits.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -56,6 +57,55 @@ range_is_empty (Range range)
   return range.src_start == 0 && range.dst_start == 0 && range.len == 0;
 }
 
+void
+parse_ranges (Range ranges[7][RANGE_MAX_LEN])
+{
+  char *line;
+  int map_index = -1;
+  int range_index = 0;
+  while ((line = strtok (NULL, "\n")) != NULL)
+    {
+      if (isdigit (line[0]))
+        {
+          Range range = range_new_from_line (line);
+          ranges[map_index][range_index] = range;
+          range_index++;
+        }
+      else if (line[0] != '\n' && isalpha (line[0]))
+        {
+          map_index++;
+          range_index = 0;
+        }
+    }
+}
+
+void
+map_ranges (Range ranges[7][RANGE_MAX_LEN], long *seeds, int seed_len)
+{
+  for (int i = 0; i < 7; i++)
+    {
+
+      for (int k = 0; k < seed_len; k++)
+        {
+          long seed = seeds[k];
+          for (int j = 0; j < RANGE_MAX_LEN; j++)
+            {
+              Range range = ranges[i][j];
+
+              if (range_is_empty (range))
+                continue;
+
+              if (seed >= range.src_start
+                  && seed < range.src_start + range.len)
+                {
+                  long move = range.dst_start - range.src_start;
+                  seeds[k] = seed + move;
+                }
+            }
+        }
+    }
+}
+
 unsigned
 part_one (char *input)
 {
@@ -77,47 +127,13 @@ part_one (char *input)
     }
 
   // read ranges
-  // set up ranges
   Range ranges[7][RANGE_MAX_LEN] = { 0 };
-  int map_index = -1;
-  int range_index = 0;
-  while ((line = strtok (NULL, "\n")) != NULL)
-    {
-      if (isdigit (line[0]))
-        {
-          Range range = range_new_from_line (line);
-          ranges[map_index][range_index] = range;
-          range_index++;
-        }
-      else if (line[0] != '\n' && isalpha (line[0]))
-        {
-          map_index++;
-          range_index = 0;
-        }
-    }
+  parse_ranges (ranges);
 
-  for (int i = 0; i < 7; i++)
-    {
-      for (int k = 0; k < SEED_NUM; k++)
-        {
-          long seed = seeds[k];
-          for (int j = 0; j < RANGE_MAX_LEN; j++)
-            {
-              Range range = ranges[i][j];
+  // map to new ranges
+  map_ranges (ranges, seeds, SEED_NUM);
 
-              if (range_is_empty (range))
-                continue;
-
-              if (seed >= range.src_start
-                  && seed <= range.src_start + range.len)
-                {
-                  long move = range.dst_start - range.src_start;
-                  seeds[k] = seed + move;
-                }
-            }
-        }
-    }
-
+  // find smallest location
   long smallest = seeds[0];
   for (int i = 1; i < SEED_NUM; i++)
     {
@@ -130,13 +146,52 @@ part_one (char *input)
 unsigned
 part_two (char *input)
 {
-  return 0;
+  char *line;
+  line = strtok (input, "\n");
+  // parse starting seeds
+  // skip "seeds: "
+  line += 7;
+  // store them as longs, as they can be pretty large
+  long seeds[SEED_NUM] = { 0 };
+  // scan seeds
+  for (int i = 0; i < SEED_NUM; i++)
+    {
+      SKIP_WHITESPACES (line);
+      long number = atol (line);
+      seeds[i] = number;
+      int number_len = floor (log10 (number)) + 1;
+      line += number_len;
+    }
+
+  // read ranges
+  Range ranges[7][RANGE_MAX_LEN] = { 0 };
+  parse_ranges (ranges);
+
+  long smallest = LONG_MAX;
+#pragma omp parallel for
+  for (int i = 0; i < SEED_NUM; i += 2)
+    {
+      long seed_start = seeds[i];
+      long seed_length = seeds[i + 1];
+
+      long current_seed[1] = { 0 };
+      for (int k = 0; k < seed_length; k++)
+        {
+          current_seed[0] = seed_start + seed_length - k - 1;
+          map_ranges (ranges, current_seed, 1);
+          if (current_seed[0] < smallest)
+            smallest = current_seed[0];
+        }
+    }
+
+  // find smallest location
+  return smallest;
 }
 
 int
 main (int argc, char *argv[])
 {
   print_result (part_one, 35);
-  print_result (part_two, 0);
+  print_result (part_two, 46);
   return EXIT_SUCCESS;
 }
