@@ -25,24 +25,6 @@
 #define TEMPERATURE_TO_HUMIDITY_HEADER "temperature-to-humidity map:"
 #define HUMIDITY_TO_LOCATION_HEADER "humidity-to-location map:"
 
-void
-read_numbers (char *input, int *out)
-{
-  if (input == NULL || out == NULL)
-    return;
-
-  int i = 0;
-  while (input[0] != '\0' && input[0] != '\n')
-    {
-      out[i] = atoi (input);
-      i++;
-      int number_len = out[i] == 0 ? 1 : floor (log10 (out[i])) + 1;
-      input += number_len;
-      SKIP_WHITESPACES (input);
-      printf ("Input: %s\n", input);
-    }
-}
-
 typedef struct
 {
   long dst_start;
@@ -92,7 +74,6 @@ part_one (char *input)
       seeds[i] = number;
       int number_len = floor (log10 (number)) + 1;
       line += number_len;
-      printf ("Seed: %ld\n", seeds[i]);
     }
 
   // read ranges
@@ -114,20 +95,12 @@ part_one (char *input)
           range_index = 0;
         }
     }
-  char *mapNames[]
-      = { "seed-to-soil map:\n",         "soil-to-fertilizer map:\n",
-          "fertilizer-to-water map:\n",  "water-to-light map:\n",
-          "light-to-temperature map:\n", "temperature-to-humidity map:\n",
-          "humidity-to-location map:\n", "" };
 
   for (int i = 0; i < 7; i++)
     {
-
       for (int k = 0; k < SEED_NUM; k++)
         {
-
           long seed = seeds[k];
-          printf ("%s", mapNames[i]);
           for (int j = 0; j < RANGE_MAX_LEN; j++)
             {
               Range range = ranges[i][j];
@@ -140,9 +113,6 @@ part_one (char *input)
                 {
                   long move = range.dst_start - range.src_start;
                   seeds[k] = seed + move;
-                  printf ("%ld is in range %ld..%ld, mapped to %ld\n", seed,
-                          range.src_start, range.src_start + range.len,
-                          seeds[k]);
                 }
             }
         }
