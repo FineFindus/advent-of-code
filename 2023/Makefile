@@ -1,4 +1,4 @@
-CFLAGS = -lm -std=gnu11 -march=native -Ofast -Wall -Werror -pedantic
+CFLAGS = -lm -std=gnu11 -march=native -Ofast -Wall -Werror -pedantic -fsanitize=address,undefined -g -fopenmp
 
 fmt:
 	find . -type f -iname '*.h' -o -iname '*.c' | xargs clang-format -i --style=GNU
