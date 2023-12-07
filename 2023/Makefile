@@ -5,12 +5,12 @@ fmt:
 
 scaffold/%:
 	mkdir src/$*
-	# download input file
-	aoc --year 2023 -d $* --input-file ./src/$*/input.txt download
 	#create empty example file
 	touch src/$*/example.txt
 	#setup template file
 	cp src/template.c src/$*/solution.c
+	# download input file
+	aoc --year 2023 -d $* --input-file ./src/$*/input.txt download
 
 test/%:
 	gcc -DDAY='"$*"' ${CFLAGS} -o solution src/$*/solution.c src/shared/* && ./solution
