@@ -1,9 +1,7 @@
 #include "../shared/aoc.h"
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 
 unsigned
 part_one (char *input)
