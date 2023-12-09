@@ -14,11 +14,14 @@
 
 #define CARD_LEN 5
 
+#define CARD_JOKER 1
 #define CARD_T 10
 #define CARD_J 11
 #define CARD_Q 12
 #define CARD_K 13
 #define CARD_A 14
+
+static bool is_part_two = false;
 
 typedef enum
 {
@@ -39,7 +42,7 @@ char_to_num (char c)
     case 'T':
       return CARD_T;
     case 'J':
-      return CARD_J;
+      return is_part_two ? CARD_JOKER : CARD_J;
     case 'Q':
       return CARD_Q;
     case 'K':
@@ -79,8 +82,15 @@ game_new_from_line (char *line)
   // calculate card type
   int instances[2][5] = { 0 };
   int numberCount = 0;
+  int jokers = 0;
   for (int i = 0; i < 5; i++)
     {
+      if (is_part_two && game.cards[i] == CARD_JOKER)
+        {
+          jokers++;
+          continue;
+        }
+
       int index = arr_find_index (instances[0], CARD_LEN, game.cards[i]);
       if (index == -1)
         {
@@ -91,9 +101,9 @@ game_new_from_line (char *line)
       instances[1][index]++;
     }
 
-  int max = arr_max_element (instances[1], 5);
+  int max = arr_max_element (instances[1], 5) + jokers * is_part_two;
 
-  if (instances[1][0] == 5)
+  if (instances[1][0] == 5 || max == 5)
     game.type = FiveOfAKind;
   else if (max == 4)
     game.type = FourOfAKind;
@@ -171,13 +181,35 @@ part_one (char *input)
 unsigned
 part_two (char *input)
 {
-  return 0;
+  is_part_two = true;
+  unsigned sum = 0;
+  Game games[GAMES];
+
+  char *line;
+  line = strtok (input, "\n");
+  int games_n = 0;
+  do
+    {
+      Game game = game_new_from_line (line);
+      games[games_n] = game;
+      games_n++;
+    }
+  while ((line = strtok (NULL, "\n")) != NULL);
+
+  games_sort (games, games_n);
+  for (int i = 0; i < games_n; i++)
+    {
+      Game game = games[i];
+      sum += game.bid * (i + 1);
+    }
+
+  return sum;
 }
 
 int
 main (int argc, char *argv[])
 {
   print_result (part_one, 6440);
-  print_result (part_two, 0);
+  print_result (part_two, 5905);
   return EXIT_SUCCESS;
 }
