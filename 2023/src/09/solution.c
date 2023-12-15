@@ -1,4 +1,5 @@
 #include "../shared/aoc.h"
+#include "../shared/utils.h"
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -65,13 +66,24 @@ part_one (char *input)
 unsigned
 part_two (char *input)
 {
-  return 0;
+  unsigned sum = 0;
+  char *line;
+  line = strtok (input, "\n");
+  do
+    {
+      int history[NUMS];
+      parse_numbers (history, line);
+      arr_reverse (history, NUMS);
+      sum += calculate_next_number (history, NUMS);
+    }
+  while ((line = strtok (NULL, "\n")) != NULL);
+  return sum;
 }
 
 int
 main (int argc, char *argv[])
 {
   print_result (part_one, 114);
-  print_result (part_two, 0);
+  print_result (part_two, 2);
   return EXIT_SUCCESS;
 }
