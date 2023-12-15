@@ -26,3 +26,14 @@ arr_find_index (int *arr, int len, int value)
     }
   return -1;
 }
+
+void
+arr_reverse (int *arr, int len)
+{
+  for (int i = 0; i < len / 2; i++)
+    {
+      int temp = arr[i];
+      arr[i] = arr[len - 1 - i];
+      arr[len - 1 - i] = temp;
+    }
+}
