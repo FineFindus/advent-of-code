@@ -3,6 +3,7 @@
 ## Used Languages
  - 2022 - [`Rust`](https://github.com/FineFindus/advent-of-code/blob/master/2022/)
  - 2023 - [`C`](https://github.com/FineFindus/advent-of-code/blob/master/2023/)
+ - 2024 - [`Rust`](https://github.com/FineFindus/advent-of-code/blob/master/2024/)
 
 ## Setup
 
