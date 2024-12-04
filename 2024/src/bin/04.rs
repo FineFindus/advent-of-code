@@ -43,16 +43,14 @@ pub fn part_two(input: &str) -> Option<u32> {
         .map(|line| line.chars().collect_vec())
         .collect_vec();
 
-    let mut sum = 0;
-    for y in 1..(grid.len() - 1) {
-        for x in 1..(grid[y].len() - 1) {
-            if grid[y][x] != 'A' {
-                continue;
-            }
-
+    (1..grid.len() - 1)
+        .cartesian_product(1..grid[0].len() - 1)
+        .filter(|&(y, x)| grid[y][x] == 'A')
+        .map(|(y, x)| {
             let mut directions = (-1, -1);
-            let count = (0..4)
+            (0..4)
                 .map(|_| {
+                    // rotate directions by 90 degree
                     directions = (directions.1, directions.0.neg());
                     directions
                 })
@@ -69,11 +67,10 @@ pub fn part_two(input: &str) -> Option<u32> {
                     )
                 })
                 .filter(|(a, b)| a == &'M' && b == &'S')
-                .count();
-            sum += (count == 2) as u32;
-        }
-    }
-    Some(sum)
+                .count()
+        })
+        .map(|count| (count == 2) as u32)
+        .sum1()
 }
 
 #[cfg(test)]
