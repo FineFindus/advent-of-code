@@ -1,3 +1,5 @@
+use std::ops::Neg;
+
 use itertools::Itertools;
 
 advent_of_code::solution!(4);
@@ -48,20 +50,27 @@ pub fn part_two(input: &str) -> Option<u32> {
                 continue;
             }
 
-            let elemns = (-1..=1)
-                .cartesian_product(-1..=1)
-                .filter(|(a, b)| *a != 0 && *b != 0)
-                .map(|(a, b)| (y as i32 + a, x as i32 + b))
-                .map(|(y, x)| grid[y as usize][x as usize])
-                .counts();
-
-            if elemns.get(&'M') == Some(&2)
-                && elemns.get(&'S') == Some(&2)
-            // extremly hacky solution
-                && grid[y - 1][x - 1] != grid[y + 1][x + 1]
-            {
-                sum += 1;
-            }
+            let mut directions = (-1, -1);
+            let count = (0..4)
+                .map(|_| {
+                    directions = (directions.1, directions.0.neg());
+                    directions
+                })
+                .map(|directions| {
+                    (
+                        (y as i32 + directions.0, x as i32 + directions.1),
+                        (y as i32 + directions.0.neg(), x as i32 + directions.1.neg()),
+                    )
+                })
+                .map(|((y_1, x_1), (y_2, x_2))| {
+                    (
+                        grid[y_1 as usize][x_1 as usize],
+                        grid[y_2 as usize][x_2 as usize],
+                    )
+                })
+                .filter(|(a, b)| a == &'M' && b == &'S')
+                .count();
+            sum += (count == 2) as u32;
         }
     }
     Some(sum)
