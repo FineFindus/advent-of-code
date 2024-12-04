@@ -42,8 +42,8 @@ pub fn part_two(input: &str) -> Option<u32> {
         .collect_vec();
 
     let mut sum = 0;
-    for y in 0..grid.len() {
-        for x in 0..grid[y].len() {
+    for y in 1..(grid.len() - 1) {
+        for x in 1..(grid[y].len() - 1) {
             if grid[y][x] != 'A' {
                 continue;
             }
@@ -52,10 +52,6 @@ pub fn part_two(input: &str) -> Option<u32> {
                 .cartesian_product(-1..=1)
                 .filter(|(a, b)| *a != 0 && *b != 0)
                 .map(|(a, b)| (y as i32 + a, x as i32 + b))
-                .filter(|(new_x, new_y)| {
-                    (0..grid.len() as i32).contains(new_y)
-                        && (0..grid[y].len() as i32).contains(new_x)
-                })
                 .map(|(y, x)| grid[y as usize][x as usize])
                 .counts();
 
