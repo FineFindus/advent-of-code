@@ -4,22 +4,6 @@ use itertools::Itertools;
 
 advent_of_code::solution!(6);
 
-pub fn part_one(input: &str) -> Option<u32> {
-    let mut mapped_area = input
-        .lines()
-        .map(|line| line.chars().collect_vec())
-        .collect_vec();
-
-    let mut guard = Guard::new(&mut mapped_area);
-
-    while guard.step().is_some() {}
-
-    mapped_area
-        .iter()
-        .map(|row| row.iter().filter(|char| char == &&'X').count() as u32)
-        .sum1()
-}
-
 struct Guard<'a> {
     grid: &'a mut [Vec<char>],
     position: (i32, i32),
@@ -81,6 +65,22 @@ impl<'a> Guard<'a> {
     }
 }
 
+pub fn part_one(input: &str) -> Option<u32> {
+    let mut mapped_area = input
+        .lines()
+        .map(|line| line.chars().collect_vec())
+        .collect_vec();
+
+    let mut guard = Guard::new(&mut mapped_area);
+
+    while guard.step().is_some() {}
+
+    mapped_area
+        .iter()
+        .map(|row| row.iter().filter(|char| char == &&'X').count() as u32)
+        .sum1()
+}
+
 pub fn part_two(input: &str) -> Option<u32> {
     let mut mapped_area = input
         .lines()
@@ -101,7 +101,7 @@ pub fn part_two(input: &str) -> Option<u32> {
             guard.grid[y][x] = '#';
             let mut steps = 0;
             while guard.step().is_some() {
-                if steps >= 25_000 {
+                if steps >= 6_000 {
                     obstruction_counter += 1;
                     break;
                 }
