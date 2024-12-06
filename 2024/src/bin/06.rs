@@ -4,39 +4,15 @@ use itertools::Itertools;
 
 advent_of_code::solution!(6);
 
-fn cell(mapped_area: &[Vec<char>], y: i32, x: i32) -> Option<&char> {
-    if !(0..mapped_area.len() as i32).contains(&y) || !(0..mapped_area[0].len() as i32).contains(&x)
-    {
-        return None;
-    }
-    mapped_area[y as usize].get(x as usize)
-}
-
 pub fn part_one(input: &str) -> Option<u32> {
     let mut mapped_area = input
         .lines()
         .map(|line| line.chars().collect_vec())
         .collect_vec();
 
-    let mut direction = (-1, 0);
-    let mut guard_pos = mapped_area.iter().enumerate().find_map(|(idx, row)| {
-        Some((idx as i32, row.iter().position(|char| char == &'^')? as i32))
-    })?;
+    let mut guard = Guard::new(&mut mapped_area);
 
-    loop {
-        let next_pos = (guard_pos.0 + direction.0, guard_pos.1 + direction.1);
-        mapped_area[guard_pos.0 as usize][guard_pos.1 as usize] = 'X';
-        match cell(&mapped_area, next_pos.0, next_pos.1) {
-            //rotate 90 deg
-            Some('#') => direction = (direction.1, direction.0.neg()),
-            // walk
-            Some(_) => {
-                guard_pos = next_pos;
-            }
-            // out-of-bounds
-            None => break,
-        };
-    }
+    while guard.step().is_some() {}
 
     mapped_area
         .iter()
@@ -86,9 +62,9 @@ impl<'a> Guard<'a> {
     }
 
     pub fn step(&mut self) -> Option<(i32, i32)> {
-        let next_pos = self.next_step()?;
         // mark path
         self.grid[self.position.0 as usize][self.position.1 as usize] = 'X';
+        let next_pos = self.next_step()?;
         // step to next cell
         match self.grid[next_pos.0 as usize][next_pos.1 as usize] {
             //rotate 90 deg
