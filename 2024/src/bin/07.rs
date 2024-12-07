@@ -7,9 +7,11 @@ fn is_result_possible<const CONCAT: bool>(
     intermediate_result: u64,
     values: &[u64],
 ) -> bool {
-    let Some(v) = values.first() else {
+    if values.is_empty() || intermediate_result > result {
         return intermediate_result == result;
-    };
+    }
+
+    let v = values.first().unwrap();
     is_result_possible::<CONCAT>(result, intermediate_result + v, &values[1..])
         || is_result_possible::<CONCAT>(result, intermediate_result * v, &values[1..])
         || (CONCAT
