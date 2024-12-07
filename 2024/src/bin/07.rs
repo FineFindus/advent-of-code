@@ -6,6 +6,7 @@ fn is_result_possible(result: u64, intermediate_result: u64, values: &[u64], con
     let Some(v) = values.first() else {
         return intermediate_result == result;
     };
+
     is_result_possible(result, intermediate_result + v, &values[1..], concat)
         || is_result_possible(result, intermediate_result * v, &values[1..], concat)
         || (concat
@@ -17,8 +18,13 @@ fn is_result_possible(result: u64, intermediate_result: u64, values: &[u64], con
             ))
 }
 
+// https://stackoverflow.com/questions/12700497/how-to-concatenate-two-integers-in-c/12700533#12700533
 fn concat_nums(a: u64, b: &u64) -> u64 {
-    format!("{a}{b}").parse::<u64>().unwrap()
+    let mut pow = 10;
+    while b >= &pow {
+        pow *= 10;
+    }
+    a * pow + b
 }
 
 pub fn part_one(input: &str) -> Option<u64> {
