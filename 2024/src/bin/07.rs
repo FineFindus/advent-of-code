@@ -2,19 +2,21 @@ use itertools::Itertools;
 
 advent_of_code::solution!(7);
 
-fn is_result_possible(result: u64, intermediate_result: u64, values: &[u64], concat: bool) -> bool {
+fn is_result_possible<const CONCAT: bool>(
+    result: u64,
+    intermediate_result: u64,
+    values: &[u64],
+) -> bool {
     let Some(v) = values.first() else {
         return intermediate_result == result;
     };
-
-    is_result_possible(result, intermediate_result + v, &values[1..], concat)
-        || is_result_possible(result, intermediate_result * v, &values[1..], concat)
-        || (concat
-            && is_result_possible(
+    is_result_possible::<CONCAT>(result, intermediate_result + v, &values[1..])
+        || is_result_possible::<CONCAT>(result, intermediate_result * v, &values[1..])
+        || (CONCAT
+            && is_result_possible::<true>(
                 result,
                 concat_nums(intermediate_result, v),
                 &values[1..],
-                concat,
             ))
 }
 
@@ -40,7 +42,7 @@ pub fn part_one(input: &str) -> Option<u64> {
                     .collect_vec(),
             ))
         })
-        .filter(|(result, values)| is_result_possible(*result, values[0], &values[1..], false))
+        .filter(|(result, values)| is_result_possible::<false>(*result, values[0], &values[1..]))
         .map(|(result, _values)| result)
         .sum1()
 }
@@ -58,7 +60,7 @@ pub fn part_two(input: &str) -> Option<u64> {
                     .collect_vec(),
             ))
         })
-        .filter(|(result, values)| is_result_possible(*result, values[0], &values[1..], true))
+        .filter(|(result, values)| is_result_possible::<true>(*result, values[0], &values[1..]))
         .map(|(result, _values)| result)
         .sum1()
 }
