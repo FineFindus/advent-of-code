@@ -15,15 +15,15 @@ fn is_result_possible<const CONCAT: bool>(
         || (CONCAT
             && is_result_possible::<true>(
                 result,
-                concat_nums(intermediate_result, v),
+                concat_nums(intermediate_result, *v),
                 &values[1..],
             ))
 }
 
 // https://stackoverflow.com/questions/12700497/how-to-concatenate-two-integers-in-c/12700533#12700533
-fn concat_nums(a: u64, b: &u64) -> u64 {
+const fn concat_nums(a: u64, b: u64) -> u64 {
     let mut pow = 10;
-    while b >= &pow {
+    while b >= pow {
         pow *= 10;
     }
     a * pow + b
