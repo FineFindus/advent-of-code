@@ -12,7 +12,7 @@ pub fn part_one(input: &str) -> Option<u32> {
             .enumerate()
             .filter(|&(_, char)| char != '.')
             .for_each(|(index, char)| {
-                let location = (line_index as isize, index as isize);
+                let location = (index as isize, line_index as isize);
                 antenna
                     .entry(char)
                     .and_modify(|locs| locs.push(location))
@@ -22,12 +22,12 @@ pub fn part_one(input: &str) -> Option<u32> {
     let mut antinodes: HashSet<(isize, isize)> = HashSet::new();
 
     for (_type, locations) in antenna.iter_mut() {
-        while let Some((y, x)) = locations.pop() {
-            for &(y_2, x_2) in locations.iter() {
+        while let Some((x, y)) = locations.pop() {
+            for &(x_2, y_2) in locations.iter() {
                 let dist = (y_2 - y, x_2 - x);
                 let antinode_before = (y_2 + dist.0, x_2 + dist.1);
-                let antinode_after = (y - dist.0, x - dist.1);
                 antinodes.insert(antinode_before);
+                let antinode_after = (y - dist.0, x - dist.1);
                 antinodes.insert(antinode_after);
             }
         }
