@@ -1,12 +1,10 @@
-use std::{
-    collections::{hash_set, HashSet},
-    ops::Neg,
-};
+use std::{collections::HashSet, ops::Neg};
 
 use itertools::Itertools;
 
 advent_of_code::solution!(10);
 
+/// Returns the cell at `(y,x)`, if it exists.
 fn cell(grid: &[Vec<u32>], y: i32, x: i32) -> Option<&u32> {
     if !(0..grid.len() as i32).contains(&y) || !(0..grid[0].len() as i32).contains(&x) {
         return None;
@@ -14,7 +12,7 @@ fn cell(grid: &[Vec<u32>], y: i32, x: i32) -> Option<&u32> {
     grid[y as usize].get(x as usize)
 }
 
-pub fn trail_score(
+fn calculate_trail(
     grid: &[Vec<u32>],
     scores: &mut HashSet<(i32, i32)>,
     y: i32,
@@ -40,59 +38,48 @@ pub fn trail_score(
                 cell.abs_diff(*trail_head) == 1 && cell > trail_head && cell < &10
             })
         })
-        .filter_map(|(y, x)| trail_score(grid, scores, y, x))
+        .filter_map(|(y, x)| calculate_trail(grid, scores, y, x))
+        .sum1()
+}
+
+fn rate_trail<F>(input: &str, f: F) -> Option<u32>
+where
+    F: Fn(&[Vec<u32>], usize, usize) -> u32,
+{
+    let grid = input
+        .lines()
+        .map(|line| {
+            line.chars()
+                .map(|char| char.to_digit(10).unwrap_or(10))
+                .collect_vec()
+        })
+        .collect_vec();
+
+    grid.iter()
+        .enumerate()
+        .flat_map(|(y, row)| {
+            row.iter()
+                .enumerate()
+                .filter(|(_x, &trail)| trail == 0)
+                .map(move |(x, _trail)| (x, y))
+        })
+        .map(|(x, y)| f(&grid, x, y))
         .sum1()
 }
 
 pub fn part_one(input: &str) -> Option<u32> {
-    let grid = input
-        .lines()
-        .map(|line| {
-            line.chars()
-                .map(|char| char.to_digit(10).unwrap_or(10))
-                .collect_vec()
-        })
-        .collect_vec();
-
-    grid.iter()
-        .enumerate()
-        .flat_map(|(y, row)| {
-            row.iter()
-                .enumerate()
-                .filter(|(_x, &trail)| trail == 0)
-                .map(move |(x, _trail)| (x, y))
-        })
-        .map(|(x, y)| {
-            let mut scores = HashSet::new();
-            trail_score(&grid, &mut scores, y as i32, x as i32);
-            scores.len() as u32
-        })
-        .sum1()
+    rate_trail(input, |grid, x, y| {
+        let mut scores = HashSet::new();
+        calculate_trail(grid, &mut scores, y as i32, x as i32);
+        scores.len() as u32
+    })
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    let grid = input
-        .lines()
-        .map(|line| {
-            line.chars()
-                .map(|char| char.to_digit(10).unwrap_or(10))
-                .collect_vec()
-        })
-        .collect_vec();
-
-    grid.iter()
-        .enumerate()
-        .flat_map(|(y, row)| {
-            row.iter()
-                .enumerate()
-                .filter(|(_x, &trail)| trail == 0)
-                .map(move |(x, _trail)| (x, y))
-        })
-        .filter_map(|(x, y)| {
-            let mut scores = HashSet::new();
-            trail_score(&grid, &mut scores, y as i32, x as i32)
-        })
-        .sum1()
+    rate_trail(input, |grid, x, y| {
+        let mut scores = HashSet::new();
+        calculate_trail(grid, &mut scores, y as i32, x as i32).unwrap_or(0)
+    })
 }
 
 #[cfg(test)]
