@@ -71,7 +71,28 @@ pub fn part_one(input: &str) -> Option<u32> {
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    None
+    let grid = input
+        .lines()
+        .map(|line| {
+            line.chars()
+                .map(|char| char.to_digit(10).unwrap_or(10))
+                .collect_vec()
+        })
+        .collect_vec();
+
+    grid.iter()
+        .enumerate()
+        .flat_map(|(y, row)| {
+            row.iter()
+                .enumerate()
+                .filter(|(_x, &trail)| trail == 0)
+                .map(move |(x, _trail)| (x, y))
+        })
+        .filter_map(|(x, y)| {
+            let mut scores = HashSet::new();
+            trail_score(&grid, &mut scores, y as i32, x as i32)
+        })
+        .sum1()
 }
 
 #[cfg(test)]
@@ -87,6 +108,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, None);
+        assert_eq!(result, Some(81));
     }
 }
