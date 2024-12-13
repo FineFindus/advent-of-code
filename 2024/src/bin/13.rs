@@ -25,9 +25,7 @@ fn calculate_price_combination(
     }
 }
 
-
-pub fn part_one(input: &str) -> Option<i64> {
-    //TODO: maybe not use regex to extract the numbers
+fn calculate_required_tokens(input: &str, offset: i64) -> Option<i64> {
     regex::Regex::new(
         r"Button A: X\+(\d+), Y\+(\d+)\nButton B: X\+(\d+), Y\+(\d+)\nPrize: X=(\d+), Y=(\d+)",
     )
@@ -36,24 +34,17 @@ pub fn part_one(input: &str) -> Option<i64> {
     .map(|c| c.extract())
     .map(|(_, values)| values.map(|v| v.parse::<i64>().unwrap()))
     .filter_map(|[a_x, a_y, b_x, b_y, p_x, p_y]| {
-        calculate_price_combination((a_x, a_y), (b_x, b_y), (p_x, p_y))
+        calculate_price_combination((a_x, a_y), (b_x, b_y), (offset + p_x, offset + p_y))
     })
     .sum1()
 }
 
+pub fn part_one(input: &str) -> Option<i64> {
+    calculate_required_tokens(input, 0)
+}
+
 pub fn part_two(input: &str) -> Option<i64> {
-    const ERROR: i64 = 10_000_000_000_000;
-    regex::Regex::new(
-        r"Button A: X\+(\d+), Y\+(\d+)\nButton B: X\+(\d+), Y\+(\d+)\nPrize: X=(\d+), Y=(\d+)",
-    )
-    .expect("`regex` should be valid")
-    .captures_iter(input)
-    .map(|c| c.extract())
-    .map(|(_, values)| values.map(|v| v.parse::<i64>().unwrap()))
-    .filter_map(|[a_x, a_y, b_x, b_y, p_x, p_y]| {
-        calculate_price_combination((a_x, a_y), (b_x, b_y), (ERROR + p_x, ERROR + p_y))
-    })
-    .sum1()
+    calculate_required_tokens(input, 10_000_000_000_000)
 }
 
 #[cfg(test)]
@@ -69,6 +60,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, None);
+        assert_eq!(result, Some(875318608908));
     }
 }
