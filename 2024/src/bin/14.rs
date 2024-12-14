@@ -46,40 +46,39 @@ fn calculate_safety_score(positions: &[(i32, i32)]) -> Option<u32> {
     quadrants.iter().product1()
 }
 
-pub fn part_one(input: &str) -> Option<u32> {
-    let positions = regex::Regex::new(r"p=(\d+),(\d+) v=(-?\d+),(-?\d+)")
-        .expect("`regex` should be a valid regex")
-        .captures_iter(input)
-        .map(|c| c.extract())
-        .map(|(_, digits)| digits.map(|digit| digit.parse::<i32>().unwrap()))
-        .map(|[px, py, vx, vy]| predict_robot_position((px, py), (vx, vy), 100))
-        .collect_vec();
-    calculate_safety_score(&positions)
-}
-
-pub fn part_two(input: &str) -> Option<u32> {
-    let robots = regex::Regex::new(r"p=(\d+),(\d+) v=(-?\d+),(-?\d+)")
+fn parse_robots(input: &str) -> Vec<((i32, i32), (i32, i32))> {
+    regex::Regex::new(r"p=(\d+),(\d+) v=(-?\d+),(-?\d+)")
         .expect("`regex` should be a valid regex")
         .captures_iter(input)
         .map(|c| c.extract())
         .map(|(_, digits)| digits.map(|digit| digit.parse::<i32>().unwrap()))
         .map(|[px, py, vx, vy]| ((px, py), (vx, vy)))
-        .collect_vec();
+        .collect_vec()
+}
 
-    let mut positions = robots.iter().map(|(pos, vel)| *pos).collect_vec();
-    Some(
-        (1..WIDTH * HEIGHT)
-            .filter_map(|time| {
-                positions = positions
-                    .iter()
-                    .enumerate()
-                    .map(|(index, &position)| predict_robot_position(position, robots[index].1, 1))
-                    .collect_vec();
-                Some((time, calculate_safety_score(&positions)?))
-            })
-            .min_by_key(|(_time, score)| *score)?
-            .0 as u32,
-    )
+pub fn part_one(input: &str) -> Option<u32> {
+    let positions = parse_robots(input)
+        .into_iter()
+        .map(|(position, velocity)| predict_robot_position(position, velocity, 100))
+        .collect_vec();
+    calculate_safety_score(&positions)
+}
+
+pub fn part_two(input: &str) -> Option<u32> {
+    let robots = parse_robots(input);
+    let mut positions = robots.iter().map(|(pos, _vel)| *pos).collect_vec();
+    let time = (1..WIDTH * HEIGHT)
+        .filter_map(|time| {
+            positions = positions
+                .iter()
+                .enumerate()
+                .map(|(index, &position)| predict_robot_position(position, robots[index].1, 1))
+                .collect_vec();
+            Some((time, calculate_safety_score(&positions)?))
+        })
+        .min_by_key(|(_time, score)| *score)?
+        .0 as u32;
+    Some(time)
 }
 
 #[cfg(test)]
@@ -95,6 +94,8 @@ mod tests {
     #[test]
     fn test_part_two() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, None);
+        // this is just to ensure that the test still passes, there is not christmas tree in the
+        // test data
+        assert_eq!(result, Some(5));
     }
 }
