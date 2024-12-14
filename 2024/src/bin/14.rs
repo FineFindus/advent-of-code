@@ -11,9 +11,13 @@ const HEIGHT: i32 = 103;
 #[cfg(test)]
 const HEIGHT: i32 = 7;
 
-fn predict_robot_position(start_position: (i32, i32), velocity: (i32, i32)) -> (i32, i32) {
+fn predict_robot_position(
+    start_position: (i32, i32),
+    velocity: (i32, i32),
+    steps: usize,
+) -> (i32, i32) {
     let mut position = start_position;
-    for _ in 0..100 {
+    for _ in 0..steps {
         position = (
             (position.0 + velocity.0).rem_euclid(WIDTH),
             (position.1 + velocity.1).rem_euclid(HEIGHT),
@@ -22,14 +26,7 @@ fn predict_robot_position(start_position: (i32, i32), velocity: (i32, i32)) -> (
     position
 }
 
-pub fn part_one(input: &str) -> Option<u32> {
-    let positions = regex::Regex::new(r"p=(\d+),(\d+) v=(-?\d+),(-?\d+)")
-        .expect("`regex` should be a valid regex")
-        .captures_iter(input)
-        .map(|c| c.extract())
-        .map(|(_, digits)| digits.map(|digit| digit.parse::<i32>().unwrap()))
-        .map(|[px, py, vx, vy]| predict_robot_position((px, py), (vx, vy)))
-        .collect_vec();
+fn calculate_safety_score(positions: &[(i32, i32)]) -> Option<u32> {
     let mut quadrants = [0; 4];
     for position in positions {
         if position.1 < HEIGHT / 2 {
@@ -49,8 +46,40 @@ pub fn part_one(input: &str) -> Option<u32> {
     quadrants.iter().product1()
 }
 
+pub fn part_one(input: &str) -> Option<u32> {
+    let positions = regex::Regex::new(r"p=(\d+),(\d+) v=(-?\d+),(-?\d+)")
+        .expect("`regex` should be a valid regex")
+        .captures_iter(input)
+        .map(|c| c.extract())
+        .map(|(_, digits)| digits.map(|digit| digit.parse::<i32>().unwrap()))
+        .map(|[px, py, vx, vy]| predict_robot_position((px, py), (vx, vy), 100))
+        .collect_vec();
+    calculate_safety_score(&positions)
+}
+
 pub fn part_two(input: &str) -> Option<u32> {
-    None
+    let robots = regex::Regex::new(r"p=(\d+),(\d+) v=(-?\d+),(-?\d+)")
+        .expect("`regex` should be a valid regex")
+        .captures_iter(input)
+        .map(|c| c.extract())
+        .map(|(_, digits)| digits.map(|digit| digit.parse::<i32>().unwrap()))
+        .map(|[px, py, vx, vy]| ((px, py), (vx, vy)))
+        .collect_vec();
+
+    let mut positions = robots.iter().map(|(pos, vel)| *pos).collect_vec();
+    Some(
+        (1..WIDTH * HEIGHT)
+            .filter_map(|time| {
+                positions = positions
+                    .iter()
+                    .enumerate()
+                    .map(|(index, &position)| predict_robot_position(position, robots[index].1, 1))
+                    .collect_vec();
+                Some((time, calculate_safety_score(&positions)?))
+            })
+            .min_by_key(|(_time, score)| *score)?
+            .0 as u32,
+    )
 }
 
 #[cfg(test)]
