@@ -14,34 +14,22 @@ const HEIGHT: i32 = 7;
 fn predict_robot_position(
     start_position: (i32, i32),
     velocity: (i32, i32),
-    steps: usize,
+    steps: i32,
 ) -> (i32, i32) {
-    let mut position = start_position;
-    for _ in 0..steps {
-        position = (
-            (position.0 + velocity.0).rem_euclid(WIDTH),
-            (position.1 + velocity.1).rem_euclid(HEIGHT),
-        );
-    }
-    position
+    (
+        (start_position.0 + velocity.0 * steps).rem_euclid(WIDTH),
+        (start_position.1 + velocity.1 * steps).rem_euclid(HEIGHT),
+    )
 }
 
 fn calculate_safety_score(positions: &[(i32, i32)]) -> Option<u32> {
     let mut quadrants = [0; 4];
     for position in positions {
-        if position.1 < HEIGHT / 2 {
-            if position.0 < WIDTH / 2 {
-                quadrants[0] += 1;
-            } else if position.0 > (WIDTH / 2) {
-                quadrants[1] += 1;
-            }
-        } else if position.1 > HEIGHT / 2 {
-            if position.0 < WIDTH / 2 {
-                quadrants[2] += 1;
-            } else if position.0 > (WIDTH / 2) {
-                quadrants[3] += 1;
-            }
-        }
+        let lower = position.1 > HEIGHT / 2;
+        let right = position.0 > WIDTH / 2;
+        let index = lower as usize * 2 + right as usize;
+        // only increase the count if the position actually falls into one of the quadrants
+        quadrants[index] += (position.0 != WIDTH / 2 && position.1 != HEIGHT / 2) as u32;
     }
     quadrants.iter().product1()
 }
