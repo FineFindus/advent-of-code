@@ -25,9 +25,9 @@ fn predict_robot_position(
 fn calculate_safety_score(positions: &[(i32, i32)]) -> Option<u32> {
     let mut quadrants = [0; 4];
     for position in positions {
-        let lower = position.1 > HEIGHT / 2;
+        let upper = position.1 > HEIGHT / 2;
         let right = position.0 > WIDTH / 2;
-        let index = lower as usize * 2 + right as usize;
+        let index = upper as usize * 2 + right as usize;
         // only increase the count if the position actually falls into one of the quadrants
         quadrants[index] += (position.0 != WIDTH / 2 && position.1 != HEIGHT / 2) as u32;
     }
