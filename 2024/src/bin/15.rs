@@ -13,20 +13,20 @@ fn cell<T>(grid: &[Vec<T>], y: i32, x: i32) -> Option<&T> {
 fn move_entity(
     grid: &mut [Vec<char>],
     entity: char,
-    postion: (i32, i32),
+    position: (i32, i32),
     direction: (i32, i32),
 ) -> Option<(i32, i32)> {
-    let target_pos = (postion.0 + direction.0, postion.1 + direction.1);
+    let target_pos = (position.0 + direction.0, position.1 + direction.1);
     match cell(grid, target_pos.0, target_pos.1) {
         Some(&'#') => None,
         Some(&'.') => {
-            grid[postion.0 as usize][postion.1 as usize] = '.';
+            grid[position.0 as usize][position.1 as usize] = '.';
             grid[target_pos.0 as usize][target_pos.1 as usize] = entity;
             Some(target_pos)
         }
         Some(&'O') => {
             if move_entity(grid, 'O', target_pos, direction).is_some() {
-                grid[postion.0 as usize][postion.1 as usize] = '.';
+                grid[position.0 as usize][position.1 as usize] = '.';
                 grid[target_pos.0 as usize][target_pos.1 as usize] = entity;
                 Some(target_pos)
             } else {
@@ -37,9 +37,9 @@ fn move_entity(
             if move_entity(grid, ']', (target_pos.0, target_pos.1 + 1), direction).is_some()
                 && move_entity(grid, '[', target_pos, direction).is_some()
             {
-                grid[postion.0 as usize][postion.1 as usize] = '.';
+                grid[position.0 as usize][position.1 as usize] = '.';
                 if entity == '[' {
-                    grid[postion.0 as usize][(postion.1 + 1) as usize] = '.';
+                    grid[position.0 as usize][(position.1 + 1) as usize] = '.';
                 }
                 grid[target_pos.0 as usize][target_pos.1 as usize] = entity;
                 Some(target_pos)
@@ -51,9 +51,9 @@ fn move_entity(
             if move_entity(grid, '[', (target_pos.0, target_pos.1 - 1), direction).is_some()
                 && move_entity(grid, ']', target_pos, direction).is_some()
             {
-                grid[postion.0 as usize][postion.1 as usize] = '.';
+                grid[position.0 as usize][position.1 as usize] = '.';
                 if entity == ']' {
-                    grid[postion.0 as usize][(postion.1 - 1) as usize] = '.';
+                    grid[position.0 as usize][(position.1 - 1) as usize] = '.';
                 }
                 grid[target_pos.0 as usize][target_pos.1 as usize] = entity;
                 Some(target_pos)
