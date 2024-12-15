@@ -10,7 +10,7 @@ fn cell<T>(grid: &[Vec<T>], y: i32, x: i32) -> Option<&T> {
     grid[y as usize].get(x as usize)
 }
 
-fn move_robot(
+fn move_entity(
     grid: &mut [Vec<char>],
     entity: char,
     postion: (i32, i32),
@@ -25,8 +25,36 @@ fn move_robot(
             Some(target_pos)
         }
         Some(&'O') => {
-            if move_robot(grid, 'O', target_pos, direction).is_some() {
+            if move_entity(grid, 'O', target_pos, direction).is_some() {
                 grid[postion.0 as usize][postion.1 as usize] = '.';
+                grid[target_pos.0 as usize][target_pos.1 as usize] = entity;
+                Some(target_pos)
+            } else {
+                None
+            }
+        }
+        Some(&'[') => {
+            if move_entity(grid, ']', (target_pos.0, target_pos.1 + 1), direction).is_some()
+                && move_entity(grid, '[', target_pos, direction).is_some()
+            {
+                grid[postion.0 as usize][postion.1 as usize] = '.';
+                if entity == '[' {
+                    grid[postion.0 as usize][(postion.1 + 1) as usize] = '.';
+                }
+                grid[target_pos.0 as usize][target_pos.1 as usize] = entity;
+                Some(target_pos)
+            } else {
+                None
+            }
+        }
+        Some(&']') => {
+            if move_entity(grid, '[', (target_pos.0, target_pos.1 - 1), direction).is_some()
+                && move_entity(grid, ']', target_pos, direction).is_some()
+            {
+                grid[postion.0 as usize][postion.1 as usize] = '.';
+                if entity == ']' {
+                    grid[postion.0 as usize][(postion.1 - 1) as usize] = '.';
+                }
                 grid[target_pos.0 as usize][target_pos.1 as usize] = entity;
                 Some(target_pos)
             } else {
@@ -60,7 +88,7 @@ pub fn part_one(input: &str) -> Option<u32> {
             'v' => (1, 0),
             v => unreachable!("Unkown move instruction {v}"),
         };
-        if let Some(position) = move_robot(&mut grid, '@', robot, direction) {
+        if let Some(position) = move_entity(&mut grid, '@', robot, direction) {
             robot = position;
         }
     }
@@ -76,71 +104,6 @@ pub fn part_one(input: &str) -> Option<u32> {
     }
     Some(gps_sum as u32)
 }
-
-fn move_entity(
-    grid: &mut [Vec<char>],
-    entity: char,
-    postion: (i32, i32),
-    direction: (i32, i32),
-    tries_left: usize,
-) -> Option<(i32, i32)> {
-    if tries_left == 0 {
-        return None;
-    }
-    let target_pos = (postion.0 + direction.0, postion.1 + direction.1);
-    match cell(grid, target_pos.0, target_pos.1) {
-        Some(&'#') => None,
-        Some(&'.') => {
-            grid[postion.0 as usize][postion.1 as usize] = '.';
-            grid[target_pos.0 as usize][target_pos.1 as usize] = entity;
-            Some(target_pos)
-        }
-        Some(&'[') => {
-            if move_entity(
-                grid,
-                ']',
-                (target_pos.0, target_pos.1 + 1),
-                direction,
-                tries_left - 1,
-            )
-            .is_some()
-                && move_entity(grid, '[', target_pos, direction, tries_left - 1).is_some()
-            {
-                grid[postion.0 as usize][postion.1 as usize] = '.';
-                if entity == '[' {
-                    grid[postion.0 as usize][(postion.1 + 1) as usize] = '.';
-                }
-                grid[target_pos.0 as usize][target_pos.1 as usize] = entity;
-                Some(target_pos)
-            } else {
-                None
-            }
-        }
-        Some(&']') => {
-            if move_entity(
-                grid,
-                '[',
-                (target_pos.0, target_pos.1 - 1),
-                direction,
-                tries_left - 1,
-            )
-            .is_some()
-                && move_entity(grid, ']', target_pos, direction, tries_left - 1).is_some()
-            {
-                grid[postion.0 as usize][postion.1 as usize] = '.';
-                if entity == ']' {
-                    grid[postion.0 as usize][(postion.1 - 1) as usize] = '.';
-                }
-                grid[target_pos.0 as usize][target_pos.1 as usize] = entity;
-                Some(target_pos)
-            } else {
-                None
-            }
-        }
-        Some(_) | None => None,
-    }
-}
-
 pub fn part_two(input: &str) -> Option<u32> {
     let (grid, moves) = input.split_once("\n\n")?;
     let mut grid = grid
@@ -175,7 +138,7 @@ pub fn part_two(input: &str) -> Option<u32> {
             'v' => (1, 0),
             v => unreachable!("Unkown move instruction {v}"),
         };
-        if let Some(position) = move_entity(&mut grid, '@', robot, direction, 3000) {
+        if let Some(position) = move_entity(&mut grid, '@', robot, direction) {
             robot = position;
         } else {
             grid = reset_grid;
