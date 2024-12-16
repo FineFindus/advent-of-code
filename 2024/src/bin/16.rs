@@ -100,7 +100,7 @@ fn find_best_seats(
 
     let mut best_cost = None;
     let mut best_seats: HashSet<(i32, i32)> = HashSet::new();
-    let mut min_costs: HashMap<((i32, i32), (i32, i32)), u32> = HashMap::new();
+    let mut min_costs = HashMap::new();
     while let Some(node) = queue.pop() {
         match best_cost {
             Some(old_score) if old_score < node.cost => {
