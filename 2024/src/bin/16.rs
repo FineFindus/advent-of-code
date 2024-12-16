@@ -8,14 +8,6 @@ use itertools::Itertools;
 
 advent_of_code::solution!(16);
 
-/// Returns the cell at `(y,x)`, if it exists.
-fn cell<T>(grid: &[Vec<T>], y: i32, x: i32) -> Option<&T> {
-    if !(0..grid.len() as i32).contains(&y) || !(0..grid[0].len() as i32).contains(&x) {
-        return None;
-    }
-    grid[y as usize].get(x as usize)
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 struct Node {
     cost: u32,
@@ -57,8 +49,7 @@ fn find_best_path(
         for i in 0..4 {
             let candidate = (node.position.0 + direction.0, node.position.1 + direction.1);
             // rotate next direction by 90 degree
-            if cell(grid, candidate.0, candidate.1).is_some_and(|char| char != &'#')
-                && visited.insert(candidate)
+            if grid[candidate.0 as usize][candidate.1 as usize] != '#' && visited.insert(candidate)
             {
                 queue.push(Node {
                     cost: node.cost + 1 + 1000 * i.min(1),
