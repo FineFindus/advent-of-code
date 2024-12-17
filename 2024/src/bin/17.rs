@@ -27,7 +27,7 @@ fn execute(mut reg_a: u64, mut reg_b: u64, mut reg_c: u64, instructions: &[u64])
         let operand = instructions[instruction_ptr + 1];
         let combo_operand_mapping = [0, 1, 2, 3, reg_a, reg_b, reg_c];
         let combo_operand = combo_operand_mapping[operand as usize];
-        let mut increase_instruction_ptr = true;
+
         match opcode {
             //adv
             0 => reg_a >>= combo_operand,
@@ -39,7 +39,7 @@ fn execute(mut reg_a: u64, mut reg_b: u64, mut reg_c: u64, instructions: &[u64])
             3 => {
                 if reg_a != 0 {
                     instruction_ptr = operand as usize;
-                    increase_instruction_ptr = false;
+                    continue;
                 }
             }
             // bxc
@@ -54,9 +54,7 @@ fn execute(mut reg_a: u64, mut reg_b: u64, mut reg_c: u64, instructions: &[u64])
             7 => reg_c = reg_a >> combo_operand,
             v => unreachable!("Found expected opcode {v}"),
         }
-        if increase_instruction_ptr {
-            instruction_ptr += 2;
-        }
+        instruction_ptr += 2;
     }
     output
 }
