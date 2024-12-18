@@ -35,8 +35,11 @@ impl PartialOrd for Node {
     }
 }
 
-fn find_path(falling_bytes: &[(i32, i32)], start: (i32, i32), goal: (i32, i32)) -> Option<u32> {
-    let falling_bytes: HashSet<&(i32, i32)> = HashSet::from_iter(falling_bytes.iter());
+fn find_path(
+    falling_bytes: &HashSet<(i32, i32)>,
+    start: (i32, i32),
+    goal: (i32, i32),
+) -> Option<u32> {
     let mut queue = BinaryHeap::new();
     queue.push(Node {
         cost: 0,
@@ -77,12 +80,12 @@ fn find_path(falling_bytes: &[(i32, i32)], start: (i32, i32), goal: (i32, i32)) 
 }
 
 pub fn part_one(input: &str) -> Option<u32> {
-    let falling_bytes = input
+    let falling_bytes: HashSet<(i32, i32)> = input
         .lines()
         .filter_map(|line| line.split_once(','))
         .filter_map(|(x, y)| Some((x.parse::<i32>().ok()?, y.parse::<i32>().ok()?)))
         .take(FALLEN_BYTES)
-        .collect_vec();
+        .collect();
     find_path(&falling_bytes, (0, 0), (SIZE, SIZE))
 }
 
@@ -92,9 +95,12 @@ pub fn part_two(input: &str) -> Option<String> {
         .filter_map(|line| line.split_once(','))
         .filter_map(|(x, y)| Some((x.parse::<i32>().ok()?, y.parse::<i32>().ok()?)))
         .collect_vec();
-    for i in (0..falling_bytes.len()).skip(FALLEN_BYTES) {
-        if find_path(&falling_bytes[..=i], (0, 0), (SIZE, SIZE)).is_none() {
-            return Some(format!("{},{}", falling_bytes[i].0, falling_bytes[i].1));
+    let mut falling_bytes_set: HashSet<(i32, i32)> =
+        HashSet::from_iter(falling_bytes.iter().take(FALLEN_BYTES).copied());
+    for falling_byte in falling_bytes.into_iter().skip(FALLEN_BYTES) {
+        falling_bytes_set.insert(falling_byte);
+        if find_path(&falling_bytes_set, (0, 0), (SIZE, SIZE)).is_none() {
+            return Some(format!("{},{}", falling_byte.0, falling_byte.1));
         }
     }
     None
