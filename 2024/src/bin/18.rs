@@ -1,6 +1,6 @@
 use std::{
     cmp::Ordering,
-    collections::{BinaryHeap, HashSet},
+    collections::{BinaryHeap, HashMap, HashSet},
     ops::Neg,
 };
 
@@ -39,7 +39,7 @@ fn find_path(
     falling_bytes: &HashSet<(i32, i32)>,
     start: (i32, i32),
     goal: (i32, i32),
-) -> Option<u32> {
+) -> Option<HashSet<(i32, i32)>> {
     let mut queue = BinaryHeap::new();
     queue.push(Node {
         cost: 0,
@@ -47,11 +47,20 @@ fn find_path(
         len: 0,
     });
     let mut visited = HashSet::from([start]);
+    let mut parents = HashMap::new();
     let bounds = 0..=SIZE;
 
     while let Some(node) = queue.pop() {
         if node.position == goal {
-            return Some(node.len);
+            let mut path = HashSet::from([goal]);
+
+            let mut current = goal;
+            while let Some(&parent) = parents.get(&current) {
+                path.insert(parent);
+                current = parent;
+            }
+
+            return Some(path);
         }
 
         let mut direction = (0, 1);
@@ -64,15 +73,17 @@ fn find_path(
                 position,
                 len: node.len + 1,
             };
-            if falling_bytes.contains(&position) {
+
+            if falling_bytes.contains(&position)
+                || !bounds.contains(&position.0)
+                || !bounds.contains(&position.1)
+                || !visited.insert(position)
+            {
                 continue;
             }
-            if bounds.contains(&position.0)
-                && bounds.contains(&position.1)
-                && visited.insert(position)
-            {
-                queue.push(candidate);
-            }
+
+            queue.push(candidate);
+            parents.insert(position, node.position);
         }
     }
 
@@ -86,7 +97,7 @@ pub fn part_one(input: &str) -> Option<u32> {
         .filter_map(|(x, y)| Some((x.parse::<i32>().ok()?, y.parse::<i32>().ok()?)))
         .take(FALLEN_BYTES)
         .collect();
-    find_path(&falling_bytes, (0, 0), (SIZE, SIZE))
+    find_path(&falling_bytes, (0, 0), (SIZE, SIZE)).map(|path| path.len() as u32 - 1)
 }
 
 pub fn part_two(input: &str) -> Option<String> {
@@ -95,11 +106,22 @@ pub fn part_two(input: &str) -> Option<String> {
         .filter_map(|line| line.split_once(','))
         .filter_map(|(x, y)| Some((x.parse::<i32>().ok()?, y.parse::<i32>().ok()?)))
         .collect_vec();
-    let mut falling_bytes_set: HashSet<(i32, i32)> =
+    let mut fallen_bytes: HashSet<(i32, i32)> =
         HashSet::from_iter(falling_bytes.iter().take(FALLEN_BYTES).copied());
+
+    let mut path = find_path(&fallen_bytes, (0, 0), (SIZE, SIZE));
     for falling_byte in falling_bytes.into_iter().skip(FALLEN_BYTES) {
-        falling_bytes_set.insert(falling_byte);
-        if find_path(&falling_bytes_set, (0, 0), (SIZE, SIZE)).is_none() {
+        fallen_bytes.insert(falling_byte);
+        if !path
+            .as_ref()
+            .is_some_and(|path| path.contains(&falling_byte))
+        {
+            continue;
+        }
+
+        // a byte has fallen on our path, calculate a new path
+        path = find_path(&fallen_bytes, (0, 0), (SIZE, SIZE));
+        if path.is_none() {
             return Some(format!("{},{}", falling_byte.0, falling_byte.1));
         }
     }
