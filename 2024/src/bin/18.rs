@@ -55,7 +55,8 @@ fn find_path(falling_bytes: &[(i32, i32)], start: (i32, i32), goal: (i32, i32)) 
             direction = (direction.1, direction.0.neg());
             let position = (node.position.0 + direction.0, node.position.1 + direction.1);
             let candidate = Node {
-                cost: node.cost + 1,
+                cost: (position.0 - goal.0).unsigned_abs()
+                    + (position.1.saturating_sub(goal.1)).unsigned_abs(),
                 position,
                 len: node.len + 1,
             };
