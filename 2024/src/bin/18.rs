@@ -36,6 +36,7 @@ impl PartialOrd for Node {
 }
 
 fn find_path(falling_bytes: &[(i32, i32)], start: (i32, i32), goal: (i32, i32)) -> Option<u32> {
+    let falling_bytes: HashSet<&(i32, i32)> = HashSet::from_iter(falling_bytes.iter());
     let mut queue = BinaryHeap::new();
     queue.push(Node {
         cost: 0,
