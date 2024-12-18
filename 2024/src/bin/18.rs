@@ -85,7 +85,17 @@ pub fn part_one(input: &str) -> Option<u32> {
     find_path(&falling_bytes, (0, 0), (SIZE, SIZE))
 }
 
-pub fn part_two(input: &str) -> Option<u32> {
+pub fn part_two(input: &str) -> Option<String> {
+    let falling_bytes = input
+        .lines()
+        .filter_map(|line| line.split_once(','))
+        .filter_map(|(x, y)| Some((x.parse::<i32>().ok()?, y.parse::<i32>().ok()?)))
+        .collect_vec();
+    for i in (0..falling_bytes.len()).skip(FALLEN_BYTES) {
+        if find_path(&falling_bytes[..=i], (0, 0), (SIZE, SIZE)).is_none() {
+            return Some(format!("{},{}", falling_bytes[i].0, falling_bytes[i].1));
+        }
+    }
     None
 }
 
@@ -102,6 +112,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, None);
+        assert_eq!(result, Some("6,1".to_string()));
     }
 }
