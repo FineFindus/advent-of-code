@@ -66,7 +66,6 @@ fn find_path(grid: &[Vec<char>], start: (i32, i32), goal: (i32, i32)) -> Option<
                 len: node.len + 1,
             };
 
-            //TODO: remove bound checks
             if cell(grid, position.0, position.1).is_some_and(|cell| cell == &'#')
                 || !visited.insert(position)
             {
@@ -100,7 +99,7 @@ fn calculate_cheats<const CHEAT_DISTANCE: u32>(input: &str) -> Option<u32> {
         .tuple_combinations()
         .map(|((index_a, a), (index_b, b))| {
             let distance = (a.0 - b.0).unsigned_abs() + (a.1.saturating_sub(b.1)).unsigned_abs();
-            let saved_distance = index_a.abs_diff(index_b) - distance as usize;
+let saved_distance = index_a.abs_diff(index_b) - distance as usize;
             (distance <= CHEAT_DISTANCE && saved_distance >= 100) as u32
         })
         .sum1()
