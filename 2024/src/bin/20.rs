@@ -8,6 +8,11 @@ use itertools::Itertools;
 
 advent_of_code::solution!(20);
 
+#[cfg(not(test))]
+const MIN_CHEAT_DISTANCE: usize = 100;
+#[cfg(test)]
+const MIN_CHEAT_DISTANCE: usize = 64;
+
 /// Returns the cell at `(y,x)`, if it exists.
 fn cell<T>(grid: &[Vec<T>], y: i32, x: i32) -> Option<&T> {
     grid[y as usize].get(x as usize)
@@ -99,8 +104,8 @@ fn calculate_cheats<const CHEAT_DISTANCE: u32>(input: &str) -> Option<u32> {
         .tuple_combinations()
         .map(|((index_a, a), (index_b, b))| {
             let distance = (a.0 - b.0).unsigned_abs() + (a.1.saturating_sub(b.1)).unsigned_abs();
-let saved_distance = index_a.abs_diff(index_b) - distance as usize;
-            (distance <= CHEAT_DISTANCE && saved_distance >= 100) as u32
+            let saved_distance = index_a.abs_diff(index_b) - distance as usize;
+            (distance <= CHEAT_DISTANCE && saved_distance >= MIN_CHEAT_DISTANCE) as u32
         })
         .sum1()
 }
@@ -120,12 +125,12 @@ mod tests {
     #[test]
     fn test_part_one() {
         let result = part_one(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, Some(0));
+        assert_eq!(result, Some(1));
     }
 
     #[test]
     fn test_part_two() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, Some(0));
+        assert_eq!(result, Some(86));
     }
 }
