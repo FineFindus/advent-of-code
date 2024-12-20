@@ -105,23 +105,14 @@ pub fn part_one(input: &str) -> Option<u32> {
     })?;
 
     let path = find_path(&grid, start, goal)?;
-    let mut cheats = 0;
-    for (index_a, a) in path.iter().enumerate() {
-        for (index_b, b) in path.iter().enumerate().skip(index_a) {
+    path.iter()
+        .enumerate()
+        .tuple_combinations()
+        .map(|((index_a, a), (index_b, b))| {
             let distance = (a.0 - b.0).unsigned_abs() + (a.1.saturating_sub(b.1)).unsigned_abs();
-            if distance > 2 {
-                continue;
-            }
-            if index_a.abs_diff(index_b) <= distance as usize {
-                continue;
-            }
-            if index_a.abs_diff(index_b) <= 100 {
-                continue;
-            }
-            cheats += 1;
-        }
-    }
-    Some(cheats)
+            (distance <= 2 && index_a.abs_diff(index_b) > 100) as u32
+        })
+        .sum1()
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
