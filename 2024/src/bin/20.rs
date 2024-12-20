@@ -116,7 +116,28 @@ pub fn part_one(input: &str) -> Option<u32> {
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    None
+    let grid = input
+        .lines()
+        .map(|line| line.chars().collect_vec())
+        .collect_vec();
+
+    let start = grid.iter().enumerate().find_map(|(idx, row)| {
+        Some((idx as i32, row.iter().position(|char| char == &'S')? as i32))
+    })?;
+    let goal = grid.iter().enumerate().find_map(|(idx, row)| {
+        Some((idx as i32, row.iter().position(|char| char == &'E')? as i32))
+    })?;
+
+    let path = find_path(&grid, start, goal)?;
+    path.iter()
+        .enumerate()
+        .tuple_combinations()
+        .map(|((index_a, a), (index_b, b))| {
+            let distance = (a.0 - b.0).unsigned_abs() + (a.1.saturating_sub(b.1)).unsigned_abs();
+            let cheat = index_a.abs_diff(index_b) - distance as usize;
+            (distance <= 20 && cheat >= 100) as u32
+        })
+        .sum1()
 }
 
 #[cfg(test)]
@@ -132,6 +153,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, None);
+        assert_eq!(result, Some(0));
     }
 }
