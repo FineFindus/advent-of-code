@@ -1,155 +1,145 @@
 use std::collections::HashMap;
 
-use itertools::Itertools;
-
 advent_of_code::solution!(21);
 
-fn find_numeric_path(start: (i32, i32), goal: (i32, i32)) -> Vec<char> {
-    let dy = goal.0 - start.0;
-    let dx = goal.1 - start.1;
+// inspired by https://gist.github.com/KateMorley/5c3987ecd5a214b6ebc0311bb4e0c339
 
-    let mut directions = Vec::new();
-    let horiz = Vec::from_iter(
-        std::iter::repeat(if dx >= 0 { '>' } else { '<' }).take(dx.unsigned_abs() as usize),
-    );
-
-    let vert = Vec::from_iter(
-        std::iter::repeat(if dy >= 0 { '^' } else { 'v' }).take(dy.unsigned_abs() as usize),
-    );
-
-    if start.0 == 0 && goal.1 == 0 {
-        directions.extend(vert);
-        directions.extend(horiz);
-    } else if start.1 == 0 && goal.0 == 0 {
-        directions.extend(horiz);
-        directions.extend(vert);
-    } else if dx < 0 {
-        directions.extend(horiz);
-        directions.extend(vert);
-    } else {
-        directions.extend(vert);
-        directions.extend(horiz);
-    }
-    directions
-}
-fn find_dir_path(start: (i32, i32), goal: (i32, i32)) -> Vec<char> {
-    let dy = goal.0 - start.0;
-    let dx = goal.1 - start.1;
-
-    let mut directions = Vec::new();
-    let horiz = Vec::from_iter(
-        std::iter::repeat(if dx >= 0 { '>' } else { '<' }).take(dx.unsigned_abs() as usize),
-    );
-
-    let vert = Vec::from_iter(
-        std::iter::repeat(if dy >= 0 { '^' } else { 'v' }).take(dy.unsigned_abs() as usize),
-    );
-
-    if start.1 == 0 && goal.0 == 1 {
-        directions.extend(horiz);
-        directions.extend(vert);
-    } else if start.0 == 1 && goal.0 == 0 {
-        directions.extend(vert);
-        directions.extend(horiz);
-    } else if dx < 0 {
-        directions.extend(horiz);
-        directions.extend(vert);
-    } else {
-        directions.extend(vert);
-        directions.extend(horiz);
-    }
-    directions
+enum Keypad {
+    Numeric,
+    Directional,
 }
 
-fn encode_numeric_keypad(keypad: &HashMap<char, (i32, i32)>, keys: &[char]) -> Vec<char> {
-    let mut position = keypad[&'A'];
-    let mut directions = Vec::new();
-    for key in keys {
-        let goal = keypad[key];
-        if position != goal {
-            let path = find_numeric_path(position, goal);
-            directions.extend(path);
+impl Keypad {
+    pub fn is_gap(&self, x: i32, y: i32) -> bool {
+        match self {
+            Self::Numeric => x == 0 && y == 3,
+            Self::Directional => x == 0 && y == 0,
+        }
+    }
+
+    pub fn position(&self, key: char) -> (i32, i32) {
+        if key == 'A' {
+            return match self {
+                Keypad::Numeric => (2, 3),
+                Keypad::Directional => (2, 0),
+            };
         }
 
-        directions.push('A');
-        position = goal;
-    }
-    directions
-}
-
-fn encode_keypad(keypad: &HashMap<char, (i32, i32)>, keys: &[char]) -> Vec<char> {
-    let mut position = keypad[&'A'];
-    let mut directions = Vec::new();
-    for key in keys {
-        let goal = keypad[key];
-        if position != goal {
-            let path = find_dir_path(position, goal);
-            directions.extend(path);
+        match key {
+            // numeric keys
+            '7' => (0, 0),
+            '8' => (1, 0),
+            '9' => (2, 0),
+            '4' => (0, 1),
+            '5' => (1, 1),
+            '6' => (2, 1),
+            '1' => (0, 2),
+            '2' => (1, 2),
+            '3' => (2, 2),
+            '0' => (1, 3),
+            // directional keys
+            '^' => (1, 0),
+            '<' => (0, 1),
+            'v' => (1, 1),
+            '>' => (2, 1),
+            _ => unreachable!("Found unexpected key: {key}"),
         }
-        directions.push('A');
-        position = goal;
     }
-    directions
 }
 
-fn numeric_value(chars: &[char]) -> u32 {
-    let mut result = 0;
-    for (i, c) in chars.iter().enumerate() {
-        // Check if the character is a digit
-        if let Some(digit) = c.to_digit(10) {
-            result += digit * 10u32.pow((2 - i) as u32);
+struct Robot {
+    keypad: Keypad,
+    cache: HashMap<(char, char), u64>,
+    next: Option<Box<Robot>>,
+}
+
+impl Robot {
+    fn new(keypad: Keypad, next: Option<Box<Robot>>) -> Self {
+        Self {
+            keypad,
+            cache: HashMap::new(),
+            next,
+        }
+    }
+
+    fn encode_length(&mut self, current_key: char, next_key: char) -> u64 {
+        if let Some(pushes) = self.cache.get(&(current_key, next_key)) {
+            return *pushes;
+        }
+
+        let (current_x, current_y) = self.keypad.position(current_key);
+        let (next_x, next_y) = self.keypad.position(next_key);
+
+        let dx = next_x - current_x;
+        let dy = next_y - current_y;
+
+        let key_horizontal = if dx > 0 { '>' } else { '<' };
+        let key_vertical = if dy > 0 { 'v' } else { '^' };
+
+        let mut pushes = u64::MAX;
+
+        if !self.keypad.is_gap(current_x, next_y) {
+            pushes = pushes.min(self.encode_next(key_vertical, dy.abs(), key_horizontal, dx.abs()))
+        };
+
+        if !self.keypad.is_gap(next_x, current_y) {
+            pushes = pushes.min(self.encode_next(key_horizontal, dx.abs(), key_vertical, dy.abs()))
+        };
+
+        self.cache.insert((current_key, next_key), pushes);
+
+        pushes
+    }
+
+    fn encode_next(&mut self, key_1: char, times_1: i32, key_2: char, times_2: i32) -> u64 {
+        if let Some(next) = self.next.as_mut() {
+            let mut pushes = 0;
+            let mut last_key = 'A';
+
+            for (key, times) in [(key_1, times_1), (key_2, times_2)] {
+                for _ in 0..times {
+                    pushes += next.encode_length(last_key, key);
+                    last_key = key
+                }
+            }
+
+            pushes + next.encode_length(last_key, 'A')
         } else {
-            return 0;
+            (times_1 + times_2 + 1) as u64
         }
     }
-    result
 }
 
-fn compute_complexity(input: &str) -> Option<u32> {
-    let keycodes = input
-        .lines()
-        .map(|line| line.chars().collect_vec())
-        .collect_vec();
+fn compute_complexity(input: &str, robots: usize) -> u64 {
+    let mut next = None;
+    for _ in 0..robots {
+        next = Some(Box::new(Robot::new(Keypad::Directional, next)));
+    }
 
-    let numeric_keypad = HashMap::from([
-        ('A', (0, 2)),
-        ('0', (0, 1)),
-        ('1', (1, 0)),
-        ('2', (1, 1)),
-        ('3', (1, 2)),
-        ('4', (2, 0)),
-        ('5', (2, 1)),
-        ('6', (2, 2)),
-        ('7', (3, 0)),
-        ('8', (3, 1)),
-        ('9', (3, 2)),
-    ]);
-
-    let directional_keypad = HashMap::from([
-        ('A', (1, 2)),
-        ('^', (1, 1)),
-        ('<', (0, 0)),
-        ('v', (0, 1)),
-        ('>', (0, 2)),
-    ]);
+    let mut robot = Robot::new(Keypad::Numeric, next);
 
     let mut complexity = 0;
-    for keys in keycodes {
-        let door_sequence = encode_numeric_keypad(&numeric_keypad, &keys);
-        let robot_directional_input = encode_keypad(&directional_keypad, &door_sequence);
-        let directional_input = encode_keypad(&directional_keypad, &robot_directional_input);
-        let length = directional_input.len() as u32;
-        complexity += numeric_value(&keys[..3]) * length;
+    for keys in input.lines() {
+        let numeric_value = &keys[..keys.len() - 1].parse::<u64>().unwrap();
+
+        let mut current_key = 'A';
+        let mut length = 0;
+        for next_key in keys.chars() {
+            length += robot.encode_length(current_key, next_key);
+            current_key = next_key;
+        }
+
+        complexity += numeric_value * length;
     }
-    Some(complexity)
+    complexity
 }
 
-pub fn part_one(input: &str) -> Option<u32> {
-    compute_complexity(input)
+pub fn part_one(input: &str) -> Option<u64> {
+    Some(compute_complexity(input, 2))
 }
 
-pub fn part_two(input: &str) -> Option<u32> {
-    None
+pub fn part_two(input: &str) -> Option<u64> {
+    Some(compute_complexity(input, 25))
 }
 
 #[cfg(test)]
@@ -165,6 +155,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, None);
+        assert_eq!(result, Some(154115708116294));
     }
 }
