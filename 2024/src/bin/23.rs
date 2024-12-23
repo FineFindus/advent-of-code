@@ -7,10 +7,9 @@ fn find_triangles<'a>(graph: &HashMap<&'a str, HashSet<&'a str>>) -> Vec<Vec<&'a
     for (&computer, neighbors) in graph.iter() {
         for &linked_computer in neighbors {
             if linked_computer > computer {
-                let common_neighbors: Vec<&str> = neighbors
+                let common_neighbors: Vec<&&str> = neighbors
                     .intersection(&graph[&linked_computer])
-                    .copied()
-                    .filter(|&v| v > linked_computer) // Ensure lexicographical order
+                    .filter(|&&v| v > linked_computer) // Ensure lexicographical order
                     .collect();
 
                 for neighbor in common_neighbors {
