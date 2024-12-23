@@ -54,11 +54,11 @@ pub fn part_one(input: &str) -> Option<u32> {
             if linked_computer <= computer {
                 continue;
             }
-                let triagnles_neighbors = neighbors
-                    .intersection(&graph[&linked_computer])
-                    .filter(|&&v| v > linked_computer) // Ensure lexicographical order
-                    .map(|neighbor| vec![computer, linked_computer, neighbor]);
-                triangles.extend(triagnles_neighbors);
+            let triagnles_neighbors = neighbors
+                .intersection(&graph[&linked_computer])
+                .filter(|&&v| v > linked_computer) // Ensure lexicographical order
+                .map(|neighbor| vec![computer, linked_computer, neighbor]);
+            triangles.extend(triagnles_neighbors);
         }
     }
 
