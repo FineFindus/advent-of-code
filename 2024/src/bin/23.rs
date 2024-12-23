@@ -11,11 +11,8 @@ fn bron_kerbosch2<'a>(
     p: &mut HashSet<&'a str>,
     x: &mut HashSet<&'a str>,
 ) {
-    // algorithm BronKerbosch2(R, P, X) is
-    if p.is_empty() {
-        if x.is_empty() {
-            cliques.push(r.clone());
-        }
+    if p.is_empty() && x.is_empty() {
+        cliques.push(r.clone());
         return;
     }
     // choose a pivot vertex u in P ⋃ X
@@ -37,27 +34,6 @@ fn bron_kerbosch2<'a>(
     }
 }
 
-fn find_triangles<'a>(graph: &HashMap<&'a str, HashSet<&'a str>>) -> Vec<Vec<&'a str>> {
-    let mut triangles = Vec::new();
-
-    for (&computer, neighbors) in graph.iter() {
-        for &linked_computer in neighbors {
-            if linked_computer > computer {
-                let common_neighbors: Vec<&&str> = neighbors
-                    .intersection(&graph[&linked_computer])
-                    .filter(|&&v| v > linked_computer) // Ensure lexicographical order
-                    .collect();
-
-                for neighbor in common_neighbors {
-                    triangles.push(vec![computer, linked_computer, neighbor]);
-                }
-            }
-        }
-    }
-
-    triangles
-}
-
 fn parse_graph(input: &str) -> HashMap<&str, HashSet<&str>> {
     input
         .lines()
@@ -71,7 +47,22 @@ fn parse_graph(input: &str) -> HashMap<&str, HashSet<&str>> {
 
 pub fn part_one(input: &str) -> Option<u32> {
     let graph = parse_graph(input);
-    let connected_computer = find_triangles(&graph)
+    let mut triangles = Vec::new();
+
+    for (&computer, neighbors) in graph.iter() {
+        for &linked_computer in neighbors {
+            if linked_computer <= computer {
+                continue;
+            }
+                let triagnles_neighbors = neighbors
+                    .intersection(&graph[&linked_computer])
+                    .filter(|&&v| v > linked_computer) // Ensure lexicographical order
+                    .map(|neighbor| vec![computer, linked_computer, neighbor]);
+                triangles.extend(triagnles_neighbors);
+        }
+    }
+
+    let connected_computer = triangles
         .iter()
         .filter(|triangle| triangle.iter().any(|v| v.starts_with("t")))
         .count();
