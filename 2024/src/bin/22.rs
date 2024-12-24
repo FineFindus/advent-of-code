@@ -93,7 +93,7 @@ mod tests {
     #[test]
     fn test_part_one() {
         let result = part_one(&advent_of_code::template::read_file("examples", DAY));
-        // this is just to ensure that the test still passes, as part two uses different dataw
+        // this is just to ensure that the test still passes, as part two uses different data
         // assert_eq!(result, Some(37327623));
         assert_eq!(result, Some(36492164));
     }
