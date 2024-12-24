@@ -87,19 +87,12 @@ pub fn part_one(input: &str) -> Option<u64> {
 }
 
 pub fn part_two(input: &str) -> Option<String> {
-    let (variables, gates) = input.split_once("\n\n")?;
-    let mut gates: HashMap<&str, Equation> = gates
+    let (_variables, gates) = input.split_once("\n\n")?;
+    let gates: HashMap<&str, Equation> = gates
         .lines()
         .filter_map(|line| line.split_once(" -> "))
         .map(|(equation, result)| (result, Equation::from(equation)))
         .collect();
-    gates.extend(
-        variables
-            .lines()
-            .filter_map(|line| line.split_once(": "))
-            .map(|(name, value)| (name, Equation::Value(value == "1"))),
-    );
-
     let bits = gates
         .keys()
         .filter(|key| key.starts_with("z"))
@@ -119,7 +112,7 @@ pub fn part_two(input: &str) -> Option<String> {
     let wrong_gates = gates
         .iter()
         .filter(|(output, eq)| {
-            let gate @ Equation::Gate { ty, a, b } = eq else {
+            let Equation::Gate { ty, a, b } = eq else {
                 return false;
             };
             if is_output_wire(output) && output != &&z_max {
@@ -151,7 +144,7 @@ pub fn part_two(input: &str) -> Option<String> {
             }
             false
         })
-        .map(|(output, eq)| output)
+        .map(|(output, _eq)| output)
         .sorted()
         .join(",");
 
