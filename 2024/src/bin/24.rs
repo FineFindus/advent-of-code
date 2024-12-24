@@ -112,41 +112,44 @@ pub fn part_two(input: &str) -> Option<String> {
         const INPUTS: [&str; 2] = ["x", "y"];
         INPUTS.contains(&&a[..=0]) && INPUTS.contains(&&b[..=0])
     };
+
     let is_output_wire = |output: &str| output.starts_with("z");
 
+    // https://en.wikipedia.org/wiki/File:Full-adder_logic_diagram.svg?useskin=vector#/media/File:Full-adder_logic_diagram.svg
     let wrong_gates = gates
         .iter()
-        .filter(|(output, eq)| match eq {
-            Equation::Value(_) => false,
-            _gate @ Equation::Gate { ty, a, b } => {
-                if is_output_wire(output) && output != &&z_max {
-                    // if a gate computes an output, it must be computed from XOR, except for last
-                    // carry bit
-                    ty != &GateType::Xor
-                } else if !is_output_wire(output) && !is_input_wire(a, b) {
-                    // intermediates gates cannot be Xor gates
-                    ty == &GateType::Xor
-                } else if is_input_wire(a, b) && !(a.ends_with("00") && b.ends_with("00")) {
-                    // XOR inputs should go to XOR and AND inputs to OR,
-                    // except for the fist input bits
-                    let expected_operation = if ty == &GateType::Xor {
-                        GateType::Xor
-                    } else {
-                        GateType::Or
-                    };
-                    !gates.iter().any(|(key, gate)| {
-                        &key != output
-                            && match gate {
-                                Equation::Value(_) => false,
-                                Equation::Gate { ty, a, b } => {
-                                    (output == &a || output == &b) && ty == &expected_operation
-                                }
-                            }
-                    })
-                } else {
-                    false
-                }
+        .filter(|(output, eq)| {
+            let gate @ Equation::Gate { ty, a, b } = eq else {
+                return false;
+            };
+            if is_output_wire(output) && output != &&z_max {
+                // if a gate computes an output, it must be computed from XOR, except for last
+                // carry bit
+                return ty != &GateType::Xor;
             }
+            if !is_output_wire(output) && !is_input_wire(a, b) {
+                // intermediates gates cannot be Xor gates
+                return ty == &GateType::Xor;
+            }
+            if is_input_wire(a, b) && !(a.ends_with("00") && b.ends_with("00")) {
+                // XOR inputs should go to XOR and AND inputs to OR,
+                // except for the fist input bits
+                let expected_operation = if ty == &GateType::Xor {
+                    GateType::Xor
+                } else {
+                    GateType::Or
+                };
+                return !gates.iter().any(|(key, gate)| {
+                    &key != output
+                        && match gate {
+                            Equation::Value(_) => false,
+                            Equation::Gate { ty, a, b } => {
+                                (output == &a || output == &b) && ty == &expected_operation
+                            }
+                        }
+                });
+            }
+            false
         })
         .map(|(output, eq)| output)
         .sorted()
