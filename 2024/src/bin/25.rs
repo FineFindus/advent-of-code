@@ -15,9 +15,9 @@ pub fn part_one(input: &str) -> Option<u32> {
     let (locks, keys): (Vec<_>, Vec<_>) = schematics.iter().partition_map(|schematic| {
         let mut columns = [0; 5];
         for y in 1..schematic.len() - 1 {
-            for x in 0..schematic[0].len() {
+            (0..schematic[0].len()).for_each(|x| {
                 columns[x] += (schematic[y][x] == '#') as u8;
-            }
+            });
         }
         if schematic[0].iter().all(|v| v == &'#')
             && schematic.last().unwrap().iter().all(|v| v == &'.')
@@ -30,15 +30,13 @@ pub fn part_one(input: &str) -> Option<u32> {
     let mut fits = 0;
     for lock in locks {
         for key in &keys {
-            if lock.iter().zip(key).map(|(a, b)| a + b).all(|v| v <= 5) {
-                fits += 1;
-            }
+            fits += lock.iter().zip(key).map(|(a, b)| a + b).all(|v| v <= 5) as u32;
         }
     }
     Some(fits)
 }
 
-pub fn part_two(input: &str) -> Option<u32> {
+pub fn part_two(_: &str) -> Option<u32> {
     None
 }
 
