@@ -1,39 +1,31 @@
-use itertools::Itertools;
-
 advent_of_code::solution!(25);
 
 pub fn part_one(input: &str) -> Option<u32> {
-    let schematics: Vec<Vec<Vec<char>>> = input
+    let schematics: Vec<u64> = input
         .split("\n\n")
         .map(|schematic| {
+            assert!(schematic.len() <= 64);
             schematic
-                .lines()
-                .map(|line| line.chars().collect())
-                .collect()
+                .bytes()
+                .filter(|char| char != &b'\n')
+                .enumerate()
+                .fold(0, |acc, (index, char)| {
+                    // we use a u64 to store the schematics in reverse, i.e. bit0 is last schematic
+                    // cell
+                    acc | ((char == b'#') as u64) << index as u64
+                })
         })
         .collect();
-    let (locks, keys): (Vec<_>, Vec<_>) = schematics.iter().partition_map(|schematic| {
-        let mut columns = [0; 5];
-        for y in 1..schematic.len() - 1 {
-            (0..schematic[0].len()).for_each(|x| {
-                columns[x] += (schematic[y][x] == '#') as u8;
-            });
-        }
-        if schematic[0].iter().all(|v| v == &'#')
-            && schematic.last().unwrap().iter().all(|v| v == &'.')
-        {
-            itertools::Either::Left(columns)
-        } else {
-            itertools::Either::Right(columns)
-        }
-    });
-    let mut fits = 0;
-    for lock in locks {
-        for key in &keys {
-            fits += lock.iter().zip(key).map(|(a, b)| a + b).all(|v| v <= 5) as u32;
-        }
-    }
-    Some(fits)
+
+    let (locks, keys): (Vec<u64>, Vec<u64>) = schematics
+        .iter()
+        .partition(|&&schematic| (schematic >> 30) & 1 == 1);
+
+    let nonoverlapping = locks
+        .iter()
+        .map(|&lock| keys.iter().filter(|&&key| (lock & key) == 0).count() as u32)
+        .sum();
+    Some(nonoverlapping)
 }
 
 pub fn part_two(_: &str) -> Option<u32> {
