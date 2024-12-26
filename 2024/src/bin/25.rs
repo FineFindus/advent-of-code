@@ -1,7 +1,7 @@
 advent_of_code::solution!(25);
 
 pub fn part_one(input: &str) -> Option<u32> {
-    let schematics: Vec<u64> = input
+    let (locks, keys): (Vec<u64>, Vec<u64>) = input
         .split("\n\n")
         .map(|schematic| {
             assert!(schematic.len() <= 64);
@@ -15,11 +15,7 @@ pub fn part_one(input: &str) -> Option<u32> {
                     acc | ((char == b'#') as u64) << index as u64
                 })
         })
-        .collect();
-
-    let (locks, keys): (Vec<u64>, Vec<u64>) = schematics
-        .iter()
-        .partition(|&&schematic| (schematic >> 30) & 1 == 1);
+        .partition(|schematic| (schematic >> 30) & 1 == 1);
 
     let nonoverlapping = locks
         .iter()
