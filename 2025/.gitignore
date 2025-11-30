@@ -1,0 +1,6 @@
+zig-out/
+.zig-cache/
+
+# Advent of Code
+src/data/inputs/*
+!src/data/inputs/.keep
