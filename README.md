@@ -1,15 +1,15 @@
 # 🎄 Advent of Code 🎄
 
 ## Used Languages
- - 2022 - [`Rust`](https://github.com/FineFindus/advent-of-code/blob/master/2022/)
- - 2023 - [`C`](https://github.com/FineFindus/advent-of-code/blob/master/2023/)
- - 2024 - [`Rust`](https://github.com/FineFindus/advent-of-code/blob/master/2024/)
+ - 2022 - [`Rust`](https://github.com/FineFindus/advent-of-code/blob/main/2022/)
+ - 2023 - [`C`](https://github.com/FineFindus/advent-of-code/blob/main/2023/)
+ - 2024 - [`Rust`](https://github.com/FineFindus/advent-of-code/blob/main/2024/)
 
 ## Setup
 
 ### Installing `aoc-cli`
 
-This repository relies on using [`aoc-cli`](https://github.com/scarvalhojr/aoc-cli/) for downloading th einput files. It requires a `.adventofcode.session` file in the home directory. To retrieve the session cookie, press F12 anywhere on the Advent of Code website to open the browser developer tools and copy the session cookie value under the Storage tab.
+This repository relies on using [`aoc-cli`](https://github.com/scarvalhojr/aoc-cli/) for downloading the input files. It requires a `.adventofcode.session` file in the home directory. To retrieve the session cookie, press F12 anywhere on the Advent of Code website to open the browser developer tools and copy the session cookie value under the Storage tab.
 
 ### README stars
 
