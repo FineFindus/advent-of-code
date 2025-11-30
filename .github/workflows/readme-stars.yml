@@ -3,16 +3,12 @@ name: Update readme ⭐️ progress
 on:
   push:
     branches: [main]
-    # !Please set a different minute than 51 if you enable this!
-    # schedule:
-    #     - cron: "51 */6 * * *" # Every 6 hours
-    workflow_dispatch:
 
 jobs:
     update-readme:
       strategy:
         matrix:
-          year: 
+          year:
             #- 2022
             #- 2023
             #- 2024
@@ -26,6 +22,6 @@ jobs:
                 sessionCookie: ${{ secrets.AOC_SESSION }}
                 year: ${{ matrix.year }}
                 readmeLocation: ${{ matrix.year }}/README.md
-          - uses: stefanzweifel/git-auto-commit-action@v4
+          - uses: stefanzweifel/git-auto-commit-action@v5
             with:
               commit_message: "chore(${{ matrix.year }}): update readme progess"
