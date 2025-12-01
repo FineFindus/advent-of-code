@@ -1,4 +1,4 @@
-# Advent of Code 2023 in Zig 🎄
+# Advent of Code 2025 in Zig 🎄
 
 ```sh
 # generate template/download input file for a day
