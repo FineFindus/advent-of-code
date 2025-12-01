@@ -12,7 +12,7 @@ pub fn build(b: *std.Build) void {
     }
 
     const template_path = "template/main.zig";
-    const day_name = std.fmt.allocPrint(b.allocator, "day{d}", .{day_opt}) catch unreachable;
+    const day_name = std.fmt.allocPrint(b.allocator, "{d:0>2}", .{day_opt}) catch unreachable;
     const src_file = std.fmt.allocPrint(b.allocator, "src/{s}.zig", .{day_name}) catch unreachable;
     defer b.allocator.free(day_name);
     defer b.allocator.free(src_file);
