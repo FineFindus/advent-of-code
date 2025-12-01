@@ -19,29 +19,38 @@ pub fn build(b: *std.Build) void {
 
     const generate_step = b.step("generate", "Generate source file and download input");
     {
-        // copy the template and update it to load the correct day
-        const contents = std.fs.cwd().readFileAlloc(b.allocator, template_path, 1024) catch unreachable;
-        defer b.allocator.free(contents);
+        const cwd = std.fs.cwd();
+        var exists = true;
+        cwd.access(src_file, .{}) catch |e| switch (e) {
+            error.FileNotFound => exists = false,
+            else => return,
+        };
+        if (!exists) {
 
-        const template = std.mem.replaceOwned(u8, b.allocator, contents, "day", day_name) catch unreachable;
-        defer b.allocator.free(template);
+            // copy the template and update it to load the correct day
+            const contents = std.fs.cwd().readFileAlloc(b.allocator, template_path, 1024) catch unreachable;
+            defer b.allocator.free(contents);
 
-        const file = std.fs.cwd().createFile(
-            src_file,
-            .{},
-        ) catch unreachable;
-        defer file.close();
+            const template = std.mem.replaceOwned(u8, b.allocator, contents, "day", day_name) catch unreachable;
+            defer b.allocator.free(template);
 
-        file.writeAll(template) catch unreachable;
+            const file = std.fs.cwd().createFile(
+                src_file,
+                .{},
+            ) catch unreachable;
+            defer file.close();
 
-        // download inputs
-        if (download_opt) {
-            const cmd = b.addSystemCommand(&[_][]const u8{
-                "aoc",          "download",                                                           "--year",       "2025",
-                "-d",           std.fmt.allocPrint(b.allocator, "{d}", .{day_opt}) catch unreachable, "--input-file", std.fmt.allocPrint(b.allocator, "src/data/inputs/{d:0>2}.txt", .{day_opt}) catch unreachable,
-                "--input-only",
-            });
-            generate_step.dependOn(&cmd.step);
+            file.writeAll(template) catch unreachable;
+
+            // download inputs
+            if (download_opt) {
+                const cmd = b.addSystemCommand(&[_][]const u8{
+                    "aoc",          "download",                                                           "--year",       "2025",
+                    "-d",           std.fmt.allocPrint(b.allocator, "{d}", .{day_opt}) catch unreachable, "--input-file", std.fmt.allocPrint(b.allocator, "src/data/inputs/{d:0>2}.txt", .{day_opt}) catch unreachable,
+                    "--input-only",
+                });
+                generate_step.dependOn(&cmd.step);
+            }
         }
     }
 
