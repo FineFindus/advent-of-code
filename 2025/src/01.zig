@@ -16,7 +16,7 @@ pub fn part1(input: []const u8, _: std.mem.Allocator) !usize {
         const direction = line[0];
         dial = switch (direction) {
             'L' => @mod(dial -% rotations, 100),
-            'R' => @mod(dial +% rotations, 100),
+            'R' => @mod(dial + rotations, 100),
             else => dial,
         };
         if (dial == 0) counter += 1;
