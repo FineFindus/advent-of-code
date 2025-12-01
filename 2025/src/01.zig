@@ -2,7 +2,6 @@ const std = @import("std");
 const aoc = @import("advent-of-code");
 
 const example = @embedFile("data/examples/01.txt");
-const data = @embedFile("data/inputs/01.txt");
 
 pub fn part1(input: []const u8, _: std.mem.Allocator) !usize {
     var counter: usize = 0;
@@ -59,12 +58,14 @@ pub fn part2(input: []const u8, _: std.mem.Allocator) !usize {
 }
 
 pub fn main() !void {
+    const input = @embedFile("data/inputs/01.txt");
+
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     defer _ = gpa.deinit();
     const allocator = gpa.allocator();
 
-    try aoc.solve(data, 1, part1, allocator);
-    try aoc.solve(data, 2, part2, allocator);
+    try aoc.solve(input, 1, part1, allocator);
+    try aoc.solve(input, 2, part2, allocator);
 }
 
 test "part one" {

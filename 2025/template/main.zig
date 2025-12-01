@@ -2,7 +2,6 @@ const std = @import("std");
 const aoc = @import("advent-of-code");
 
 const example = @embedFile("data/examples/day.txt");
-const input = @embedFile("data/inputs/day.txt");
 
 pub fn part1(_: []const u8, _: std.mem.Allocator) !usize {
     return 0;
@@ -13,6 +12,8 @@ pub fn part2(_: []const u8, _: std.mem.Allocator) !usize {
 }
 
 pub fn main() !void {
+    const input = @embedFile("data/inputs/day.txt");
+
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     defer _ = gpa.deinit();
     const allocator = gpa.allocator();
