@@ -28,5 +28,5 @@ test "part one" {
 
 test "part two" {
     const gpa = std.testing.allocator;
-    try std.testing.expectEqual(0, part1(example, gpa));
+    try std.testing.expectEqual(0, part2(example, gpa));
 }
