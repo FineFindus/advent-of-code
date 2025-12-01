@@ -33,17 +33,27 @@ pub fn part2(input: []const u8, _: std.mem.Allocator) !usize {
         if (line.len == 0) break;
 
         const direction = line[0];
-        const rotations = try std.fmt.parseInt(usize, line[1..], 10);
+        const rotations = try std.fmt.parseInt(isize, line[1..], 10);
 
-        for (0..rotations) |_| {
-            dial = switch (direction) {
-                'L' => dial -% 1,
-                'R' => dial + 1,
-                else => dial,
-            };
-            dial = @mod(dial, 100);
-            if (dial == 0) counter += 1;
+        counter += @intCast(@divTrunc(rotations, 100));
+        switch (direction) {
+            'L' => {
+                const new = dial - @mod(rotations, 100);
+                if (new < 0 and dial != 0) {
+                    counter += 1;
+                }
+                dial = @mod(new, 100);
+            },
+            'R' => {
+                const new = dial + @mod(rotations, 100);
+                if (new > 100 and dial != 100) {
+                    counter += 1;
+                }
+                dial = @mod(new, 100);
+            },
+            else => {},
         }
+        if (dial == 0) counter += 1;
     }
     return counter;
 }
