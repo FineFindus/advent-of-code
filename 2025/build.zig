@@ -37,7 +37,7 @@ pub fn build(b: *std.Build) void {
         // download inputs
         if (download_opt) {
             const cmd = b.addSystemCommand(&[_][]const u8{
-                "aoc",          "download",                                                           "--year",       "2024",
+                "aoc",          "download",                                                           "--year",       "2025",
                 "-d",           std.fmt.allocPrint(b.allocator, "{d}", .{day_opt}) catch unreachable, "--input-file", std.fmt.allocPrint(b.allocator, "src/data/inputs/{d:0>2}.txt", .{day_opt}) catch unreachable,
                 "--input-only",
             });
