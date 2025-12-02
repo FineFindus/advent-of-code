@@ -5,6 +5,8 @@ const example = @embedFile("data/examples/02.txt");
 
 pub fn part1(input: []const u8, alloc: std.mem.Allocator) !usize {
     var sum: usize = 0;
+    const buffer = try alloc.alloc(u8, 256);
+    defer alloc.free(buffer);
 
     var it = std.mem.splitSequence(u8, input, ",");
     while (it.next()) |raw_line| {
@@ -16,12 +18,11 @@ pub fn part1(input: []const u8, alloc: std.mem.Allocator) !usize {
         const upper = try std.fmt.parseInt(usize, id_iterator.next().?, 10);
 
         for (lower..(upper + 1)) |id| {
-            const string = try std.fmt.allocPrint(
-                alloc,
+            const string = try std.fmt.bufPrint(
+                buffer,
                 "{d}",
                 .{id},
             );
-            defer alloc.free(string);
             if (@mod(string.len, 2) != 0) {
                 continue;
             }
