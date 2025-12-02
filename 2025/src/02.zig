@@ -3,10 +3,31 @@ const aoc = @import("advent-of-code");
 
 const example = @embedFile("data/examples/02.txt");
 
-pub fn part1(input: []const u8, alloc: std.mem.Allocator) !usize {
+fn isInvalidId(id: usize) bool {
+    var n = id;
+    var digits: usize = 0;
+    var pow10: usize = 1;
+
+    while (n != 0) : (n /= 10) {
+        pow10 *= 10;
+        digits += 1;
+    }
+
+    if (digits == 0 or digits % 2 != 0) return false;
+
+    pow10 /= 10;
+
+    const half = digits / 2;
+    const divisor = std.math.pow(usize, 10, half);
+
+    const left = id / divisor;
+    const right = id % divisor;
+
+    return left == right;
+}
+
+pub fn part1(input: []const u8, _: std.mem.Allocator) !usize {
     var sum: usize = 0;
-    const buffer = try alloc.alloc(u8, 256);
-    defer alloc.free(buffer);
 
     var it = std.mem.splitSequence(u8, input, ",");
     while (it.next()) |raw_line| {
@@ -18,17 +39,7 @@ pub fn part1(input: []const u8, alloc: std.mem.Allocator) !usize {
         const upper = try std.fmt.parseInt(usize, id_iterator.next().?, 10);
 
         for (lower..(upper + 1)) |id| {
-            const string = try std.fmt.bufPrint(
-                buffer,
-                "{d}",
-                .{id},
-            );
-            if (@mod(string.len, 2) != 0) {
-                continue;
-            }
-
-            const middle = string.len / 2;
-            if (std.mem.eql(u8, string[0..middle], string[middle..])) {
+            if (isInvalidId(id)) {
                 sum += id;
             }
         }
