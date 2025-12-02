@@ -5,20 +5,10 @@ const example = @embedFile("data/examples/02.txt");
 const pow10 = [_]u128{ 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000, 10000000000, 100000000000, 1000000000000, 10000000000000, 100000000000000, 1000000000000000, 10000000000000000, 100000000000000000, 1000000000000000000, 10000000000000000000, 100000000000000000000, 1000000000000000000000, 10000000000000000000000 };
 
 fn isSymmetric(id: usize) bool {
-    var n = id;
-    var digits: usize = 0;
-    var pow: usize = 1;
+    const len = std.math.log10(id) + 1;
+    if (len % 2 != 0) return false;
 
-    while (n != 0) : (n /= 10) {
-        pow *= 10;
-        digits += 1;
-    }
-
-    if (digits == 0 or digits % 2 != 0) return false;
-
-    pow /= 10;
-
-    const half = digits / 2;
+    const half = len / 2;
     const divisor = pow10[half];
 
     const left = id / divisor;
@@ -48,8 +38,21 @@ pub fn part1(input: []const u8, _: std.mem.Allocator) !usize {
     return sum;
 }
 
+fn digit_len(n: usize) usize {
+    if (n >= 1000000000) return 10;
+    if (n >= 100000000) return 9;
+    if (n >= 10000000) return 8;
+    if (n >= 1000000) return 7;
+    if (n >= 100000) return 6;
+    if (n >= 10000) return 5;
+    if (n >= 1000) return 4;
+    if (n >= 100) return 3;
+    if (n >= 10) return 2;
+    return 1;
+}
+
 fn isRepeating(id: usize) bool {
-    const len = std.math.log10(id) + 1;
+    const len = digit_len(id);
     // pattern can be at most len repeated digits
     pattern: for (1..(len / 2) + 1) |pattern_len| {
         // pattern length must by a divisor to evenly divide the ID
