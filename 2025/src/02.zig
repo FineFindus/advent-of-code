@@ -2,23 +2,24 @@ const std = @import("std");
 const aoc = @import("advent-of-code");
 
 const example = @embedFile("data/examples/02.txt");
+const pow10 = [_]usize{ 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000 };
 
 fn isInvalidId(id: usize) bool {
     var n = id;
     var digits: usize = 0;
-    var pow10: usize = 1;
+    var pow: usize = 1;
 
     while (n != 0) : (n /= 10) {
-        pow10 *= 10;
+        pow *= 10;
         digits += 1;
     }
 
     if (digits == 0 or digits % 2 != 0) return false;
 
-    pow10 /= 10;
+    pow /= 10;
 
     const half = digits / 2;
-    const divisor = std.math.pow(usize, 10, half);
+    const divisor = pow10[half];
 
     const left = id / divisor;
     const right = id % divisor;
