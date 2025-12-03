@@ -9,10 +9,10 @@ pub fn part1(input: []const u8, _: std.mem.Allocator) !usize {
     var it = std.mem.splitSequence(u8, input, "\n");
     while (it.next()) |line| {
         if (line.len == 0) break;
-        var first: usize = 0;
-        var second: usize = 0;
+        var first: usize = line[0] - '0';
+        var second: usize = line[1] - '0';
 
-        for (0..(line.len - 1)) |index| {
+        for (2..(line.len - 1)) |index| {
             const value = line[index] - '0';
 
             if (value > first) {
