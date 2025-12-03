@@ -34,8 +34,33 @@ pub fn part1(input: []const u8, _: std.mem.Allocator) !usize {
     return sum;
 }
 
-pub fn part2(_: []const u8, _: std.mem.Allocator) !usize {
-    return 0;
+pub fn part2(input: []const u8, _: std.mem.Allocator) !usize {
+    var sum: usize = 0;
+
+    var it = std.mem.splitSequence(u8, input, "\n");
+    while (it.next()) |line| {
+        if (line.len == 0) break;
+        var enabled_batteries = [_]usize{0} ** 12;
+        var next_line_start: usize = 0;
+        for (0..enabled_batteries.len) |i| {
+            for (next_line_start..(line.len - (enabled_batteries.len - i - 1))) |line_index| {
+                const digit = line[line_index] - '0';
+
+                if (enabled_batteries[i] < digit) {
+                    next_line_start = line_index + 1;
+                    enabled_batteries[i] = digit;
+                }
+            }
+        }
+
+        var joltage: usize = 0;
+        for (enabled_batteries, 0..) |value, i| {
+            joltage += (std.math.pow(usize, 10, enabled_batteries.len - i - 1) * value);
+        }
+        sum += joltage;
+    }
+
+    return sum;
 }
 
 pub fn main() !void {
@@ -56,5 +81,5 @@ test "part one" {
 
 test "part two" {
     const gpa = std.testing.allocator;
-    try std.testing.expectEqual(0, part2(example, gpa));
+    try std.testing.expectEqual(3121910778619, part2(example, gpa));
 }
