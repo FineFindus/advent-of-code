@@ -6,9 +6,9 @@ const example = @embedFile("data/examples/04.txt");
 const Grid = struct {
     width: usize,
     height: usize,
-    buffer: []const u8,
+    buffer: []u8,
 
-    fn from_buffer(buffer: []const u8) Grid {
+    fn from_buffer(buffer: []u8) Grid {
         var it = std.mem.splitSequence(u8, buffer, "\n");
         const width = it.peek().?.len + 1;
         var height: usize = 0;
@@ -65,7 +65,9 @@ const Grid = struct {
 };
 
 pub fn part1(input: []const u8, _: std.mem.Allocator) !usize {
-    const grid = Grid.from_buffer(input);
+    //SAFETY: we never mutate the array/call `set` on the grid
+    const buffer = @constCast(input);
+    const grid = Grid.from_buffer(buffer);
 
     var sum: usize = 0;
 
@@ -103,8 +105,54 @@ pub fn part1(input: []const u8, _: std.mem.Allocator) !usize {
     return sum;
 }
 
-pub fn part2(_: []const u8, _: std.mem.Allocator) !usize {
-    return 0;
+pub fn part2(input: []const u8, allocator: std.mem.Allocator) !usize {
+    const buffer = try allocator.alloc(u8, input.len);
+    @memcpy(buffer, input);
+    defer allocator.free(buffer);
+    const grid = Grid.from_buffer(buffer);
+
+    var it = std.mem.splitSequence(u8, input, "\n");
+
+    var sum: usize = 0;
+    while (true) {
+        var removed: usize = 0;
+        var y: isize = 0;
+        while (it.next()) |line| : (y += 1) {
+            if (line.len == 0) break;
+
+            var x: isize = 0;
+            while (x < line.len) : (x += 1) {
+                const current_cell = grid.at(x, y).?;
+                if (current_cell != '@') continue;
+
+                var neighbours: usize = 0;
+
+                for (0..3) |i| {
+                    for (0..3) |j| {
+                        if (i == 1 and j == 1) continue;
+
+                        const isize_i: isize = @intCast(i);
+                        const isize_j: isize = @intCast(j);
+                        const neighbour_cell = grid.at(x + isize_i - 1, y + isize_j - 1);
+                        if (neighbour_cell == '@' or neighbour_cell == 'x') {
+                            neighbours += 1;
+                        }
+                    }
+                }
+
+                if (neighbours < 4) {
+                    removed += 1;
+                    grid.set(x, y, '.');
+                }
+            }
+        }
+        it.reset();
+
+        if (removed == 0) break;
+        sum += removed;
+    }
+
+    return sum;
 }
 
 pub fn main() !void {
@@ -125,5 +173,5 @@ test "part one" {
 
 test "part two" {
     const gpa = std.testing.allocator;
-    try std.testing.expectEqual(0, part2(example, gpa));
+    try std.testing.expectEqual(43, part2(example, gpa));
 }
