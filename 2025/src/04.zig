@@ -64,11 +64,7 @@ const Grid = struct {
     }
 };
 
-pub fn part1(input: []const u8, _: std.mem.Allocator) !usize {
-    //SAFETY: we never mutate the array/call `set` on the grid
-    const buffer = @constCast(input);
-    const grid = Grid.from_buffer(buffer);
-
+fn count(input: []const u8, grid: *Grid, comptime remove: bool) usize {
     var sum: usize = 0;
 
     var it = std.mem.splitSequence(u8, input, "\n");
@@ -90,7 +86,7 @@ pub fn part1(input: []const u8, _: std.mem.Allocator) !usize {
                     const isize_i: isize = @intCast(i);
                     const isize_j: isize = @intCast(j);
                     const neighbour_cell = grid.at(x + isize_i - 1, y + isize_j - 1);
-                    if (neighbour_cell == '@' or neighbour_cell == 'x') {
+                    if (neighbour_cell == '@') {
                         neighbours += 1;
                     }
                 }
@@ -98,56 +94,30 @@ pub fn part1(input: []const u8, _: std.mem.Allocator) !usize {
 
             if (neighbours < 4) {
                 sum += 1;
+                if (remove) grid.set(x, y, '.');
             }
         }
     }
-
     return sum;
+}
+
+pub fn part1(input: []const u8, _: std.mem.Allocator) !usize {
+    //SAFETY: we never mutate the array/call `set` on the grid
+    const buffer = @constCast(input);
+    var grid = Grid.from_buffer(buffer);
+
+    return count(input, &grid, false);
 }
 
 pub fn part2(input: []const u8, allocator: std.mem.Allocator) !usize {
     const buffer = try allocator.alloc(u8, input.len);
     @memcpy(buffer, input);
     defer allocator.free(buffer);
-    const grid = Grid.from_buffer(buffer);
-
-    var it = std.mem.splitSequence(u8, input, "\n");
+    var grid = Grid.from_buffer(buffer);
 
     var sum: usize = 0;
     while (true) {
-        var removed: usize = 0;
-        var y: isize = 0;
-        while (it.next()) |line| : (y += 1) {
-            if (line.len == 0) break;
-
-            var x: isize = 0;
-            while (x < line.len) : (x += 1) {
-                const current_cell = grid.at(x, y).?;
-                if (current_cell != '@') continue;
-
-                var neighbours: usize = 0;
-
-                for (0..3) |i| {
-                    for (0..3) |j| {
-                        if (i == 1 and j == 1) continue;
-
-                        const isize_i: isize = @intCast(i);
-                        const isize_j: isize = @intCast(j);
-                        const neighbour_cell = grid.at(x + isize_i - 1, y + isize_j - 1);
-                        if (neighbour_cell == '@' or neighbour_cell == 'x') {
-                            neighbours += 1;
-                        }
-                    }
-                }
-
-                if (neighbours < 4) {
-                    removed += 1;
-                    grid.set(x, y, '.');
-                }
-            }
-        }
-        it.reset();
-
+        const removed = count(input, &grid, true);
         if (removed == 0) break;
         sum += removed;
     }
