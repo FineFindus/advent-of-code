@@ -6,9 +6,9 @@ const example = @embedFile("data/examples/04.txt");
 const Grid = struct {
     width: usize,
     height: usize,
-    buffer: []u8,
+    buffer: []const u8,
 
-    fn from_buffer(buffer: []u8) Grid {
+    fn from_buffer(buffer: []const u8) Grid {
         var it = std.mem.splitSequence(u8, buffer, "\n");
         const width = it.peek().?.len + 1;
         var height: usize = 0;
@@ -64,13 +64,8 @@ const Grid = struct {
     }
 };
 
-pub fn part1(input: []const u8, allocator: std.mem.Allocator) !usize {
-    const buffer = try allocator.alloc(u8, input.len);
-    @memcpy(buffer, input);
-    defer allocator.free(buffer);
-
-    const grid = Grid.from_buffer(buffer);
-    std.debug.print("Grid with {d} width and {d} height\n", .{ grid.width, grid.height });
+pub fn part1(input: []const u8, _: std.mem.Allocator) !usize {
+    const grid = Grid.from_buffer(input);
 
     var sum: usize = 0;
 
