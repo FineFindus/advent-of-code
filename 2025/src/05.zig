@@ -1,0 +1,62 @@
+const std = @import("std");
+const aoc = @import("advent-of-code");
+
+const example = @embedFile("data/examples/05.txt");
+
+pub fn part1(input: []const u8, allocator: std.mem.Allocator) !usize {
+    var input_it = std.mem.splitSequence(u8, input, "\n\n");
+    var fresh_ingredients_it = std.mem.splitSequence(u8, input_it.next().?, "\n");
+
+    var fresh_ingredients = try std.ArrayList(struct { usize, usize }).initCapacity(allocator, 1024);
+    defer fresh_ingredients.deinit(allocator);
+
+    while (fresh_ingredients_it.next()) |line| {
+        if (line.len == 0) break;
+
+        var it = std.mem.splitSequence(u8, line, "-");
+        const lower = try std.fmt.parseInt(usize, it.next().?, 10);
+        const upper = try std.fmt.parseInt(usize, it.next().?, 10);
+        try fresh_ingredients.append(allocator, .{ lower, upper });
+    }
+
+    var sum: usize = 0;
+    var available_ingredients = std.mem.splitSequence(u8, input_it.next().?, "\n");
+    while (available_ingredients.next()) |line| {
+        if (line.len == 0) break;
+        const id = try std.fmt.parseInt(usize, line, 10);
+
+        for (fresh_ingredients.items) |value| {
+            if (value.@"0" <= id and id <= value.@"1") {
+                sum += 1;
+                break;
+            }
+        }
+    }
+
+    return sum;
+}
+
+pub fn part2(_: []const u8, _: std.mem.Allocator) !usize {
+    return 0;
+}
+
+pub fn main() !void {
+    const input = @embedFile("data/inputs/05.txt");
+
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    defer _ = gpa.deinit();
+    const allocator = gpa.allocator();
+
+    try aoc.solve(input, 1, part1, allocator);
+    try aoc.solve(input, 2, part2, allocator);
+}
+
+test "part one" {
+    const gpa = std.testing.allocator;
+    try std.testing.expectEqual(3, part1(example, gpa));
+}
+
+test "part two" {
+    const gpa = std.testing.allocator;
+    try std.testing.expectEqual(0, part2(example, gpa));
+}
