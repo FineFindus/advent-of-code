@@ -11,6 +11,18 @@ const Interval = struct {
         _ = context;
         return lhs.lower < rhs.lower;
     }
+
+    fn cmpId(id: usize, rhs: Interval) std.math.Order {
+        if (rhs.lower <= id and id <= rhs.upper) {
+            return .eq;
+        }
+
+        if (rhs.upper < id) {
+            return .gt;
+        }
+
+        return .lt;
+    }
 };
 
 pub fn part1(input: []const u8, allocator: std.mem.Allocator) !usize {
@@ -29,18 +41,21 @@ pub fn part1(input: []const u8, allocator: std.mem.Allocator) !usize {
         try fresh_ingredients.append(allocator, Interval{ .lower = lower, .upper = upper });
     }
 
+    std.sort.pdq(Interval, fresh_ingredients.items, {}, Interval.sortFn);
+
     var sum: usize = 0;
     var available_ingredients = std.mem.splitSequence(u8, input_it.next().?, "\n");
     while (available_ingredients.next()) |line| {
         if (line.len == 0) break;
         const id = try std.fmt.parseInt(usize, line, 10);
 
-        for (fresh_ingredients.items) |value| {
-            if (value.lower <= id and id <= value.upper) {
-                sum += 1;
-                break;
-            }
-        }
+        _ = std.sort.binarySearch(
+            Interval,
+            fresh_ingredients.items,
+            id,
+            Interval.cmpId,
+        ) orelse continue;
+        sum += 1;
     }
 
     return sum;
