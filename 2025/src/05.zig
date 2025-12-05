@@ -3,11 +3,21 @@ const aoc = @import("advent-of-code");
 
 const example = @embedFile("data/examples/05.txt");
 
+const Interval = struct {
+    lower: usize,
+    upper: usize,
+
+    fn sortFn(context: void, lhs: Interval, rhs: Interval) bool {
+        _ = context;
+        return lhs.lower < rhs.lower;
+    }
+};
+
 pub fn part1(input: []const u8, allocator: std.mem.Allocator) !usize {
     var input_it = std.mem.splitSequence(u8, input, "\n\n");
     var fresh_ingredients_it = std.mem.splitSequence(u8, input_it.next().?, "\n");
 
-    var fresh_ingredients = try std.ArrayList(struct { usize, usize }).initCapacity(allocator, 1024);
+    var fresh_ingredients = try std.ArrayList(Interval).initCapacity(allocator, 1024);
     defer fresh_ingredients.deinit(allocator);
 
     while (fresh_ingredients_it.next()) |line| {
@@ -16,7 +26,7 @@ pub fn part1(input: []const u8, allocator: std.mem.Allocator) !usize {
         var it = std.mem.splitSequence(u8, line, "-");
         const lower = try std.fmt.parseInt(usize, it.next().?, 10);
         const upper = try std.fmt.parseInt(usize, it.next().?, 10);
-        try fresh_ingredients.append(allocator, .{ lower, upper });
+        try fresh_ingredients.append(allocator, Interval{ .lower = lower, .upper = upper });
     }
 
     var sum: usize = 0;
@@ -26,7 +36,7 @@ pub fn part1(input: []const u8, allocator: std.mem.Allocator) !usize {
         const id = try std.fmt.parseInt(usize, line, 10);
 
         for (fresh_ingredients.items) |value| {
-            if (value.@"0" <= id and id <= value.@"1") {
+            if (value.lower <= id and id <= value.upper) {
                 sum += 1;
                 break;
             }
@@ -36,16 +46,11 @@ pub fn part1(input: []const u8, allocator: std.mem.Allocator) !usize {
     return sum;
 }
 
-fn lessThanFn(context: void, lhs: struct { usize, usize }, rhs: struct { usize, usize }) bool {
-    _ = context;
-    return lhs.@"0" < rhs.@"0";
-}
-
 pub fn part2(input: []const u8, allocator: std.mem.Allocator) !usize {
     var input_it = std.mem.splitSequence(u8, input, "\n\n");
     var fresh_ingredients_it = std.mem.splitSequence(u8, input_it.next().?, "\n");
 
-    var fresh_ingredients = try std.ArrayList(struct { usize, usize }).initCapacity(allocator, 256);
+    var fresh_ingredients = try std.ArrayList(Interval).initCapacity(allocator, 256);
     defer fresh_ingredients.deinit(allocator);
 
     while (fresh_ingredients_it.next()) |line| {
@@ -55,16 +60,16 @@ pub fn part2(input: []const u8, allocator: std.mem.Allocator) !usize {
         const lower = try std.fmt.parseInt(usize, it.next().?, 10);
         const upper = try std.fmt.parseInt(usize, it.next().?, 10);
 
-        try fresh_ingredients.append(allocator, .{ lower, upper });
+        try fresh_ingredients.append(allocator, Interval{ .lower = lower, .upper = upper });
     }
 
-    std.sort.pdq(struct { usize, usize }, fresh_ingredients.items, {}, lessThanFn);
+    std.sort.pdq(Interval, fresh_ingredients.items, {}, Interval.sortFn);
 
     var bound: usize = 0;
     var sum: usize = 0;
     for (fresh_ingredients.items) |value| {
-        var lower = value.@"0";
-        const upper = value.@"1" + 1;
+        var lower = value.lower;
+        const upper = value.upper + 1;
 
         if (lower < bound) {
             lower = bound;
