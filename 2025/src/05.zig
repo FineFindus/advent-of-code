@@ -36,8 +36,46 @@ pub fn part1(input: []const u8, allocator: std.mem.Allocator) !usize {
     return sum;
 }
 
-pub fn part2(_: []const u8, _: std.mem.Allocator) !usize {
-    return 0;
+fn lessThanFn(context: void, lhs: struct { usize, usize }, rhs: struct { usize, usize }) bool {
+    _ = context;
+    return lhs.@"0" < rhs.@"0";
+}
+
+pub fn part2(input: []const u8, allocator: std.mem.Allocator) !usize {
+    var input_it = std.mem.splitSequence(u8, input, "\n\n");
+    var fresh_ingredients_it = std.mem.splitSequence(u8, input_it.next().?, "\n");
+
+    var fresh_ingredients = try std.ArrayList(struct { usize, usize }).initCapacity(allocator, 256);
+    defer fresh_ingredients.deinit(allocator);
+
+    while (fresh_ingredients_it.next()) |line| {
+        if (line.len == 0) break;
+
+        var it = std.mem.splitSequence(u8, line, "-");
+        const lower = try std.fmt.parseInt(usize, it.next().?, 10);
+        const upper = try std.fmt.parseInt(usize, it.next().?, 10);
+
+        try fresh_ingredients.append(allocator, .{ lower, upper });
+    }
+
+    std.sort.pdq(struct { usize, usize }, fresh_ingredients.items, {}, lessThanFn);
+
+    var bound: usize = 0;
+    var sum: usize = 0;
+    for (fresh_ingredients.items) |value| {
+        var lower = value.@"0";
+        const upper = value.@"1" + 1;
+
+        if (lower < bound) {
+            lower = bound;
+        }
+        if (upper <= bound) continue;
+
+        sum += upper - lower;
+        bound = upper;
+    }
+
+    return sum;
 }
 
 pub fn main() !void {
@@ -58,5 +96,5 @@ test "part one" {
 
 test "part two" {
     const gpa = std.testing.allocator;
-    try std.testing.expectEqual(0, part2(example, gpa));
+    try std.testing.expectEqual(14, part2(example, gpa));
 }
