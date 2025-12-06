@@ -4,7 +4,7 @@ const aoc = @import("advent-of-code");
 const example = @embedFile("data/examples/06.txt");
 
 pub fn part1(input: []const u8, allocator: std.mem.Allocator) !usize {
-    var operands = try std.ArrayList(usize).initCapacity(allocator, 8);
+    var operands = try std.ArrayList(usize).initCapacity(allocator, 4888);
     defer operands.deinit(allocator);
 
     var index: usize = 0;
