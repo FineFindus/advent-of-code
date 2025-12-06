@@ -59,8 +59,47 @@ pub fn part1(input: []const u8, allocator: std.mem.Allocator) !usize {
     return sum;
 }
 
-pub fn part2(_: []const u8, _: std.mem.Allocator) !usize {
-    return 0;
+pub fn part2(input: []const u8, allocator: std.mem.Allocator) !usize {
+    var operands = try std.ArrayList(usize).initCapacity(allocator, 4888);
+    defer operands.deinit(allocator);
+
+    const line_length = std.mem.indexOfPos(u8, input, 0, "\n").?;
+    // all lines have the same length
+    const lines = input.len / line_length;
+
+    var sum: usize = 0;
+    var column: usize = 0;
+    while (column < line_length) : (column += 1) {
+        const symbol = input[(lines - 1) * (line_length + 1) + column];
+        var intermediate_result: usize = if (symbol == '*') 1 else 0;
+
+        while (column < line_length) : (column += 1) {
+            var operand: usize = 0;
+
+            var valid_lines: usize = 0;
+            for (0..lines - 1) |row| {
+                const digit = input[row * (line_length + 1) + column];
+                if (digit == ' ') {
+                    operand /= 10;
+                    continue;
+                }
+                operand += (digit - '0') * std.math.pow(usize, 10, lines - 2 - row);
+                valid_lines += 1;
+            }
+            if (operand == 0) break;
+
+            if (symbol == '*') {
+                intermediate_result *= operand;
+            } else {
+                intermediate_result += operand;
+            }
+            operand = 0;
+        }
+
+        sum += intermediate_result;
+    }
+
+    return sum;
 }
 
 pub fn main() !void {
@@ -81,5 +120,5 @@ test "part one" {
 
 test "part two" {
     const gpa = std.testing.allocator;
-    try std.testing.expectEqual(0, part2(example, gpa));
+    try std.testing.expectEqual(3263827, part2(example, gpa));
 }
