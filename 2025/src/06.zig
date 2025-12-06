@@ -59,10 +59,7 @@ pub fn part1(input: []const u8, allocator: std.mem.Allocator) !usize {
     return sum;
 }
 
-pub fn part2(input: []const u8, allocator: std.mem.Allocator) !usize {
-    var operands = try std.ArrayList(usize).initCapacity(allocator, 4888);
-    defer operands.deinit(allocator);
-
+pub fn part2(input: []const u8, _: std.mem.Allocator) !usize {
     const line_length = std.mem.indexOfPos(u8, input, 0, "\n").?;
     // all lines have the same length
     const lines = input.len / line_length;
