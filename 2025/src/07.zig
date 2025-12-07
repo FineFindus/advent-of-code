@@ -89,8 +89,40 @@ pub fn part1(input: []const u8, allocator: std.mem.Allocator) !usize {
     return splitters.count();
 }
 
-pub fn part2(_: []const u8, _: std.mem.Allocator) !usize {
-    return 0;
+fn countTimelines(input: []const u8, source: usize, line_length: usize, cache: *std.AutoHashMap(usize, usize)) !usize {
+    if (cache.get(source)) |count| {
+        return count;
+    }
+
+    var position = source;
+    // find next splitter
+    while (true) {
+        position += line_length + 1;
+
+        if (position >= input.len) {
+            // timeline reaches end
+            try cache.put(source, 1);
+            return 1;
+        }
+
+        if (input[position] == '^') break;
+    }
+
+    const left = try countTimelines(input, position - 1, line_length, cache);
+    const right = try countTimelines(input, position + 1, line_length, cache);
+
+    try cache.put(source, left + right);
+    return left + right;
+}
+
+pub fn part2(input: []const u8, allocator: std.mem.Allocator) !usize {
+    const line_length = std.mem.indexOfPos(u8, input, 0, "\n").?;
+
+    const source_position = std.mem.indexOfPos(u8, input, 0, "S").?;
+    var cache = std.AutoHashMap(usize, usize).init(allocator);
+    defer cache.deinit();
+
+    return try countTimelines(input, source_position, line_length, &cache);
 }
 
 pub fn main() !void {
@@ -111,5 +143,5 @@ test "part one" {
 
 test "part two" {
     const gpa = std.testing.allocator;
-    try std.testing.expectEqual(0, part2(example, gpa));
+    try std.testing.expectEqual(40, part2(example, gpa));
 }
