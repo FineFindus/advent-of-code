@@ -121,7 +121,7 @@ pub fn part1(input: []const u8, allocator: std.mem.Allocator) !usize {
     const pairs_to_process: usize = if (points.items.len == 20) 10 else 1000;
     var processed: usize = 0;
 
-    while (processed < pairs_to_process and heap.count() > 0) : (processed += 1) {
+    while (processed < pairs_to_process) : (processed += 1) {
         const edge = heap.removeMin();
         dsu.unite(edge.i, edge.j);
     }
