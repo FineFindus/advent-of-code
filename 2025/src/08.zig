@@ -3,7 +3,7 @@ const aoc = @import("advent-of-code");
 
 const example = @embedFile("data/examples/08.txt");
 
-fn UnionFind(N: usize) type {
+fn DSU(N: usize) type {
     return struct {
         const Self = @This();
 
@@ -128,8 +128,58 @@ pub fn part1(input: []const u8, allocator: std.mem.Allocator) !usize {
     return sizes[0] * sizes[1] * sizes[2];
 }
 
-pub fn part2(_: []const u8, _: std.mem.Allocator) !usize {
-    return 0;
+pub fn part2(input: []const u8, allocator: std.mem.Allocator) !usize {
+    var points = try std.ArrayList(Point).initCapacity(allocator, 1000);
+    defer points.deinit(allocator);
+
+    var it = std.mem.splitSequence(u8, input, "\n");
+    var length: usize = 0;
+    while (it.next()) |line| : (length += 1) {
+        if (line.len == 0) break;
+        var coord_it = std.mem.splitSequence(u8, line, ",");
+        const point = Point{
+            .x = try std.fmt.parseInt(isize, coord_it.next().?, 10),
+            .y = try std.fmt.parseInt(isize, coord_it.next().?, 10),
+            .z = try std.fmt.parseInt(isize, coord_it.next().?, 10),
+        };
+        try points.append(allocator, point);
+    }
+
+    var edges = try std.ArrayList([2]usize).initCapacity(allocator, length * length);
+    defer edges.deinit(allocator);
+
+    for (0..length) |k| {
+        for (k + 1..length) |j| {
+            try edges.append(allocator, [_]usize{ k, j });
+        }
+    }
+
+    std.sort.pdq(
+        [2]usize,
+        edges.items,
+        points,
+        struct {
+            fn less(ctx: std.ArrayList(Point), a: [2]usize, b: [2]usize) bool {
+                const da = ctx.items[a[0]].distance(ctx.items[a[1]]);
+                const db = ctx.items[b[0]].distance(ctx.items[b[1]]);
+                return da < db;
+            }
+        }.less,
+    );
+
+    var dsu = DSU(1000).init();
+
+    var last_pair: ?[2]usize = null;
+    for (edges.items) |pair| {
+        if (dsu.find(pair[0]) != dsu.find(pair[1])) {
+            dsu.unite(pair[0], pair[1]);
+            last_pair = pair;
+        }
+    }
+
+    const x_1: usize = @intCast(points.items[last_pair.?[0]].x);
+    const x_2: usize = @intCast(points.items[last_pair.?[1]].x);
+    return x_1 * x_2;
 }
 
 pub fn main() !void {
@@ -150,5 +200,5 @@ test "part one" {
 
 test "part two" {
     const gpa = std.testing.allocator;
-    try std.testing.expectEqual(0, part2(example, gpa));
+    try std.testing.expectEqual(25272, part2(example, gpa));
 }
