@@ -75,9 +75,8 @@ const Point = struct {
     }
 };
 
-pub fn part1(input: []const u8, allocator: std.mem.Allocator) !usize {
+fn parsePoints(input: []const u8, allocator: std.mem.Allocator) !std.ArrayList(Point) {
     var points = try std.ArrayList(Point).initCapacity(allocator, 1000);
-    defer points.deinit(allocator);
 
     var it = std.mem.splitSequence(u8, input, "\n");
     var length: usize = 0;
@@ -92,8 +91,12 @@ pub fn part1(input: []const u8, allocator: std.mem.Allocator) !usize {
         try points.append(allocator, point);
     }
 
-    var edges = try std.ArrayList([2]usize).initCapacity(allocator, length * length);
-    defer edges.deinit(allocator);
+    return points;
+}
+
+pub fn part1(input: []const u8, allocator: std.mem.Allocator) !usize {
+    var points = try parsePoints(input, allocator);
+    defer points.deinit(allocator);
 
     for (0..length) |k| {
         for (k + 1..length) |j| {
@@ -129,7 +132,7 @@ pub fn part1(input: []const u8, allocator: std.mem.Allocator) !usize {
 }
 
 pub fn part2(input: []const u8, allocator: std.mem.Allocator) !usize {
-    var points = try std.ArrayList(Point).initCapacity(allocator, 1000);
+    var points = try parsePoints(input, allocator);
     defer points.deinit(allocator);
 
     var it = std.mem.splitSequence(u8, input, "\n");
