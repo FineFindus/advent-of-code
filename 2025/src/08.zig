@@ -42,26 +42,6 @@ fn DSU(N: usize) type {
             self.parent[root_y] = root_x;
             self.size[root_x] += self.size[root_y];
         }
-
-        fn getComponentSizes(self: *Self, allocator: std.mem.Allocator) ![]usize {
-            var sizes = std.AutoHashMap(usize, usize).init(allocator);
-            defer sizes.deinit();
-
-            for (0..self.parent.len) |i| {
-                const root = self.find(i);
-                try sizes.put(root, self.size[root]);
-            }
-
-            var result = try allocator.alloc(usize, sizes.count());
-            var it = sizes.valueIterator();
-            var idx: usize = 0;
-            while (it.next()) |size| : (idx += 1) {
-                result[idx] = size.*;
-            }
-
-            std.sort.pdq(usize, result, {}, comptime std.sort.desc(usize));
-            return result;
-        }
     };
 }
 
@@ -104,16 +84,24 @@ fn parsePoints(input: []const u8, allocator: std.mem.Allocator) !std.ArrayList(P
     return points;
 }
 
-fn createEdges(points: []Point, allocator: std.mem.Allocator) !std.PriorityDequeue(Edge, void, Edge.lessThan) {
+fn createEdges(points: []Point, allocator: std.mem.Allocator, comptime max_edges: comptime_int) !std.PriorityDequeue(Edge, void, Edge.lessThan) {
     var heap = std.PriorityDequeue(Edge, void, Edge.lessThan).init(allocator, {});
 
     for (0..points.len) |i| {
         for (i + 1..points.len) |j| {
-            try heap.add(Edge{
+            const edge = Edge{
                 .i = i,
                 .j = j,
                 .dist = points[i].distance(points[j]),
-            });
+            };
+            if (heap.len < max_edges) {
+                try heap.add(edge);
+            } else if (heap.peekMax()) |top| {
+                if (top.dist > edge.dist) {
+                    _ = heap.removeMax();
+                    try heap.add(edge);
+                }
+            }
         }
     }
 
@@ -124,7 +112,7 @@ pub fn part1(input: []const u8, allocator: std.mem.Allocator) !usize {
     var points = try parsePoints(input, allocator);
     defer points.deinit(allocator);
 
-    var heap = try createEdges(points.items, allocator);
+    var heap = try createEdges(points.items, allocator, 1000);
     defer heap.deinit();
 
     var dsu = DSU(1000).init();
@@ -138,17 +126,28 @@ pub fn part1(input: []const u8, allocator: std.mem.Allocator) !usize {
         dsu.unite(edge.i, edge.j);
     }
 
-    const sizes = try dsu.getComponentSizes(allocator);
-    defer allocator.free(sizes);
+    var size_heap = std.PriorityDequeue(usize, void, struct {
+        fn less(context: void, a: usize, b: usize) std.math.Order {
+            _ = context;
+            return std.math.order(a, b);
+        }
+    }.less).init(allocator, {});
+    defer size_heap.deinit();
 
-    return sizes[0] * sizes[1] * sizes[2];
+    for (0..dsu.parent.len) |i| {
+        if (dsu.parent[i] == i) {
+            try size_heap.add(dsu.size[i]);
+        }
+    }
+
+    return size_heap.removeMax() * size_heap.removeMax() * size_heap.removeMax();
 }
 
 pub fn part2(input: []const u8, allocator: std.mem.Allocator) !usize {
     var points = try parsePoints(input, allocator);
     defer points.deinit(allocator);
 
-    var heap = try createEdges(points.items, allocator);
+    var heap = try createEdges(points.items, allocator, std.math.maxInt(usize));
     defer heap.deinit();
 
     var dsu = DSU(1000).init();
