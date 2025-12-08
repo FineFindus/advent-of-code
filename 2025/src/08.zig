@@ -75,6 +75,16 @@ const Point = struct {
     }
 };
 
+const Edge = struct {
+    i: usize,
+    j: usize,
+    dist: isize,
+
+    fn lessThan(_: void, a: Edge, b: Edge) std.math.Order {
+        return std.math.order(a.dist, b.dist);
+    }
+};
+
 fn parsePoints(input: []const u8, allocator: std.mem.Allocator) !std.ArrayList(Point) {
     var points = try std.ArrayList(Point).initCapacity(allocator, 1000);
 
@@ -94,38 +104,41 @@ fn parsePoints(input: []const u8, allocator: std.mem.Allocator) !std.ArrayList(P
     return points;
 }
 
+fn createEdges(points: []Point, allocator: std.mem.Allocator) !std.PriorityDequeue(Edge, void, Edge.lessThan) {
+    var heap = std.PriorityDequeue(Edge, void, Edge.lessThan).init(allocator, {});
+
+    for (0..points.len) |i| {
+        for (i + 1..points.len) |j| {
+            try heap.add(Edge{
+                .i = i,
+                .j = j,
+                .dist = points[i].distance(points[j]),
+            });
+        }
+    }
+
+    return heap;
+}
+
 pub fn part1(input: []const u8, allocator: std.mem.Allocator) !usize {
     var points = try parsePoints(input, allocator);
     defer points.deinit(allocator);
 
-    for (0..length) |k| {
-        for (k + 1..length) |j| {
-            try edges.append(allocator, [_]usize{ k, j });
-        }
-    }
+    var heap = try createEdges(points.items, allocator);
+    defer heap.deinit();
 
-    std.sort.pdq(
-        [2]usize,
-        edges.items,
-        points,
-        struct {
-            fn less(ctx: std.ArrayList(Point), a: [2]usize, b: [2]usize) bool {
-                const da = ctx.items[a[0]].distance(ctx.items[a[1]]);
-                const db = ctx.items[b[0]].distance(ctx.items[b[1]]);
-                return da < db;
-            }
-        }.less,
-    );
-
-    var union_find = DSU(1000).init();
+    var dsu = DSU(1000).init();
 
     //HACK: this should be only 10 for testing
-    const pairs_to_process: usize = if (length == 20) 10 else 1000;
-    for (edges.items[0..pairs_to_process]) |pair| {
-        union_find.unite(pair[0], pair[1]);
+    const pairs_to_process: usize = if (points.items.len == 20) 10 else 1000;
+    var processed: usize = 0;
+
+    while (processed < pairs_to_process and heap.count() > 0) : (processed += 1) {
+        const edge = heap.removeMin();
+        dsu.unite(edge.i, edge.j);
     }
 
-    const sizes = try union_find.getComponentSizes(allocator);
+    const sizes = try dsu.getComponentSizes(allocator);
     defer allocator.free(sizes);
 
     return sizes[0] * sizes[1] * sizes[2];
@@ -135,53 +148,21 @@ pub fn part2(input: []const u8, allocator: std.mem.Allocator) !usize {
     var points = try parsePoints(input, allocator);
     defer points.deinit(allocator);
 
-    var it = std.mem.splitSequence(u8, input, "\n");
-    var length: usize = 0;
-    while (it.next()) |line| : (length += 1) {
-        if (line.len == 0) break;
-        var coord_it = std.mem.splitSequence(u8, line, ",");
-        const point = Point{
-            .x = try std.fmt.parseInt(isize, coord_it.next().?, 10),
-            .y = try std.fmt.parseInt(isize, coord_it.next().?, 10),
-            .z = try std.fmt.parseInt(isize, coord_it.next().?, 10),
-        };
-        try points.append(allocator, point);
-    }
-
-    var edges = try std.ArrayList([2]usize).initCapacity(allocator, length * length);
-    defer edges.deinit(allocator);
-
-    for (0..length) |k| {
-        for (k + 1..length) |j| {
-            try edges.append(allocator, [_]usize{ k, j });
-        }
-    }
-
-    std.sort.pdq(
-        [2]usize,
-        edges.items,
-        points,
-        struct {
-            fn less(ctx: std.ArrayList(Point), a: [2]usize, b: [2]usize) bool {
-                const da = ctx.items[a[0]].distance(ctx.items[a[1]]);
-                const db = ctx.items[b[0]].distance(ctx.items[b[1]]);
-                return da < db;
-            }
-        }.less,
-    );
+    var heap = try createEdges(points.items, allocator);
+    defer heap.deinit();
 
     var dsu = DSU(1000).init();
 
-    var last_pair: ?[2]usize = null;
-    for (edges.items) |pair| {
-        if (dsu.find(pair[0]) != dsu.find(pair[1])) {
-            dsu.unite(pair[0], pair[1]);
-            last_pair = pair;
+    var last_edge: ?Edge = null;
+    while (heap.removeMinOrNull()) |edge| {
+        if (dsu.find(edge.i) != dsu.find(edge.j)) {
+            dsu.unite(edge.i, edge.j);
+            last_edge = edge;
         }
     }
 
-    const x_1: usize = @intCast(points.items[last_pair.?[0]].x);
-    const x_2: usize = @intCast(points.items[last_pair.?[1]].x);
+    const x_1: usize = @intCast(points.items[last_edge.?.i].x);
+    const x_2: usize = @intCast(points.items[last_edge.?.j].x);
     return x_1 * x_2;
 }
 
