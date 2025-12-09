@@ -40,8 +40,8 @@ pub fn part1(input: []const u8, allocator: std.mem.Allocator) !usize {
     for (points.items, 0..) |a, i| {
         for (i..points.items.len) |j| {
             const b = points.items[j];
-            const area = (@abs(a.x - b.x) + 1) * (@abs(a.y - b.y) + 1);
-            max = @max(max, area);
+            const area = (a.x - b.x + 1) * (a.y - b.y + 1);
+            max = @max(max, @abs(area));
         }
     }
 
