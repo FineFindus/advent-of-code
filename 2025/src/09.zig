@@ -37,8 +37,9 @@ pub fn part1(input: []const u8, allocator: std.mem.Allocator) !usize {
     defer points.deinit(allocator);
 
     var max: usize = 0;
-    for (points.items) |a| {
-        for (points.items) |b| {
+    for (points.items, 0..) |a, i| {
+        for (i..points.items.len) |j| {
+            const b = points.items[j];
             const area = (@abs(a.x - b.x) + 1) * (@abs(a.y - b.y) + 1);
             max = @max(max, area);
         }
