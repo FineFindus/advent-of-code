@@ -3,23 +3,24 @@ const aoc = @import("advent-of-code");
 
 const example = @embedFile("data/examples/10.txt");
 
-fn solve(allocator: std.mem.Allocator, wanted_indicator: u16, buttons: []const u16) !usize {
-    const State = struct {
-        indicator: u16,
-        presses: usize,
-    };
+const State = struct {
+    indicator: u16,
+    presses: usize,
+};
 
-    var queue = std.PriorityQueue(State, void, struct {
-        fn less(context: void, a: State, b: State) std.math.Order {
-            _ = context;
-            return std.math.order(a.presses, b.presses);
-        }
-    }.less).init(allocator, {});
-    defer queue.deinit();
+const BFSQueue = std.PriorityQueue(State, void, struct {
+    fn less(context: void, a: State, b: State) std.math.Order {
+        _ = context;
+        return std.math.order(a.presses, b.presses);
+    }
+}.less);
 
-    var visited = std.AutoArrayHashMap(u16, void).init(allocator);
-    defer visited.deinit();
-
+fn solve(
+    wanted_indicator: u16,
+    buttons: []const u16,
+    queue: *BFSQueue,
+    visited: *std.AutoArrayHashMap(u16, void),
+) !usize {
     try queue.add(.{ .indicator = 0, .presses = 0 });
     try visited.put(0, {});
 
@@ -31,11 +32,11 @@ fn solve(allocator: std.mem.Allocator, wanted_indicator: u16, buttons: []const u
         for (buttons) |button| {
             const new_indicator = state.indicator ^ button;
             if (!visited.contains(new_indicator)) {
-                try visited.put(new_indicator, {});
-                try queue.add(.{
+                visited.put(new_indicator, {}) catch unreachable;
+                queue.add(.{
                     .indicator = new_indicator,
                     .presses = state.presses + 1,
-                });
+                }) catch unreachable;
             }
         }
     }
@@ -45,6 +46,12 @@ fn solve(allocator: std.mem.Allocator, wanted_indicator: u16, buttons: []const u
 
 pub fn part1(input: []const u8, allocator: std.mem.Allocator) !usize {
     var total_interactions: usize = 0;
+
+    var queue = BFSQueue.init(allocator, {});
+    defer queue.deinit();
+
+    var visited = std.AutoArrayHashMap(u16, void).init(allocator);
+    defer visited.deinit();
 
     var lines = std.mem.splitSequence(u8, input[0 .. input.len - 1], "\n");
     while (lines.next()) |line| {
@@ -66,12 +73,14 @@ pub fn part1(input: []const u8, allocator: std.mem.Allocator) !usize {
             switch (value) {
                 '(' => button_wiring = 0,
                 '0'...'9' + 1 => button_wiring |= std.math.shl(u16, 1, value - '0'),
-                ')' => try buttons.append(allocator, button_wiring),
+                ')' => buttons.append(allocator, button_wiring) catch unreachable,
                 else => {},
             }
         }
 
-        total_interactions += try solve(allocator, indicator_state, buttons.items);
+        total_interactions += try solve(indicator_state, buttons.items, &queue, &visited);
+        queue.clearRetainingCapacity();
+        visited.clearRetainingCapacity();
     }
 
     return total_interactions;
