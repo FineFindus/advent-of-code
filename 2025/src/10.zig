@@ -53,9 +53,13 @@ pub fn part1(input: []const u8, allocator: std.mem.Allocator) !usize {
     var visited = std.AutoArrayHashMap(u16, void).init(allocator);
     defer visited.deinit();
 
+    var buttons = try std.ArrayList(u16).initCapacity(allocator, 10);
+    defer buttons.deinit(allocator);
+
     var lines = std.mem.splitSequence(u8, input[0 .. input.len - 1], "\n");
     while (lines.next()) |line| {
         var indicator_state: u16 = 0;
+        buttons.clearRetainingCapacity();
 
         var position: usize = 1;
         while (line[position] != ']') : (position += 1) {
@@ -63,9 +67,6 @@ pub fn part1(input: []const u8, allocator: std.mem.Allocator) !usize {
                 indicator_state |= std.math.shl(u16, 1, position - 1);
             }
         }
-
-        var buttons = try std.ArrayList(u16).initCapacity(allocator, 10);
-        defer buttons.deinit(allocator);
 
         var button_wiring: u16 = 0;
         while (line[position] != '{') : (position += 1) {
