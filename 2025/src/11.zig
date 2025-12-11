@@ -4,10 +4,11 @@ const aoc = @import("advent-of-code");
 const out = ((@as(u24, 'o') << 16) | (@as(u24, 'u') << 8) | 't');
 
 fn countPaths(
+    allocator: std.mem.Allocator,
     source: u24,
     target: u24,
     graph: *const std.AutoArrayHashMap(u24, std.ArrayList(u24)),
-    visited: *std.AutoHashMap(u24, void),
+    visited: *std.ArrayList(u24),
     cache: *std.AutoHashMap(u24, usize),
     count: usize,
 ) !usize {
@@ -23,16 +24,16 @@ fn countPaths(
     if (source == out) return 0;
 
     // mark current node as visited
-    try visited.put(source, {});
+    try visited.append(allocator, source);
     var sum = count;
 
     for (graph.get(source).?.items) |node| {
-        if (!visited.contains(node)) {
-            sum += try countPaths(node, target, graph, visited, cache, count);
+        if (!std.mem.containsAtLeastScalar(u24, visited.items, 1, node)) {
+            sum += try countPaths(allocator, node, target, graph, visited, cache, count);
         }
     }
 
-    _ = visited.remove(source);
+    _ = visited.pop();
     try cache.put(source, sum);
 
     return sum;
@@ -67,15 +68,15 @@ pub fn part1(input: []const u8, allocator: std.mem.Allocator) !usize {
         graph.deinit();
     }
 
-    var visited = std.AutoHashMap(u24, void).init(allocator);
-    defer visited.deinit();
+    var visited = try std.ArrayList(u24).initCapacity(allocator, 4096);
+    defer visited.deinit(allocator);
 
     const source = ((@as(u24, 'y') << 16) | (@as(u24, 'o') << 8) | 'u');
 
     var cache = std.AutoHashMap(u24, usize).init(allocator);
     defer cache.deinit();
 
-    const paths = try countPaths(source, out, &graph, &visited, &cache, 0);
+    const paths = try countPaths(allocator, source, out, &graph, &visited, &cache, 0);
     return paths;
 }
 
@@ -89,8 +90,8 @@ pub fn part2(input: []const u8, allocator: std.mem.Allocator) !usize {
         graph.deinit();
     }
 
-    var visited = std.AutoHashMap(u24, void).init(allocator);
-    defer visited.deinit();
+    var visited = try std.ArrayList(u24).initCapacity(allocator, 4096);
+    defer visited.deinit(allocator);
 
     var cache = std.AutoHashMap(u24, usize).init(allocator);
     defer cache.deinit();
@@ -99,15 +100,15 @@ pub fn part2(input: []const u8, allocator: std.mem.Allocator) !usize {
     const fft = ((@as(u24, 'f') << 16) | (@as(u24, 'f') << 8) | 't');
     const dac = ((@as(u24, 'd') << 16) | (@as(u24, 'a') << 8) | 'c');
 
-    var paths = try countPaths(source, fft, &graph, &visited, &cache, 0);
+    var paths = try countPaths(allocator, source, fft, &graph, &visited, &cache, 0);
 
     cache.clearRetainingCapacity();
     visited.clearRetainingCapacity();
-    paths *= try countPaths(fft, dac, &graph, &visited, &cache, 0);
+    paths *= try countPaths(allocator, fft, dac, &graph, &visited, &cache, 0);
 
     cache.clearRetainingCapacity();
     visited.clearRetainingCapacity();
-    paths *= try countPaths(dac, out, &graph, &visited, &cache, 0);
+    paths *= try countPaths(allocator, dac, out, &graph, &visited, &cache, 0);
 
     return paths;
 }
