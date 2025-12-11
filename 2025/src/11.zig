@@ -38,15 +38,8 @@ fn countPaths(
     return sum;
 }
 
-pub fn part1(input: []const u8, allocator: std.mem.Allocator) !usize {
+fn parseGraph(input: []const u8, allocator: std.mem.Allocator) !std.AutoArrayHashMap(u24, std.ArrayList(u24)) {
     var graph = std.AutoArrayHashMap(u24, std.ArrayList(u24)).init(allocator);
-    defer {
-        var outputs_it = graph.iterator();
-        while (outputs_it.next()) |entry| {
-            entry.value_ptr.deinit(allocator);
-        }
-        graph.deinit();
-    }
 
     var it = std.mem.splitSequence(u8, input[0 .. input.len - 1], "\n");
     while (it.next()) |line| {
@@ -60,6 +53,18 @@ pub fn part1(input: []const u8, allocator: std.mem.Allocator) !usize {
 
         const start = ((@as(u24, line[0]) << 16) | (@as(u24, line[1]) << 8) | line[2]);
         try graph.put(start, options);
+    }
+    return graph;
+}
+
+pub fn part1(input: []const u8, allocator: std.mem.Allocator) !usize {
+    var graph = try parseGraph(input, allocator);
+    defer {
+        var outputs_it = graph.iterator();
+        while (outputs_it.next()) |entry| {
+            entry.value_ptr.deinit(allocator);
+        }
+        graph.deinit();
     }
 
     var visited = std.AutoHashMap(u24, void).init(allocator);
@@ -69,33 +74,19 @@ pub fn part1(input: []const u8, allocator: std.mem.Allocator) !usize {
 
     var cache = std.AutoHashMap(u24, usize).init(allocator);
     defer cache.deinit();
-    const paths = try countPaths(source, out, &graph, &visited, &cache, 0);
 
+    const paths = try countPaths(source, out, &graph, &visited, &cache, 0);
     return paths;
 }
 
 pub fn part2(input: []const u8, allocator: std.mem.Allocator) !usize {
-    var graph = std.AutoArrayHashMap(u24, std.ArrayList(u24)).init(allocator);
+    var graph = try parseGraph(input, allocator);
     defer {
         var outputs_it = graph.iterator();
         while (outputs_it.next()) |entry| {
             entry.value_ptr.deinit(allocator);
         }
         graph.deinit();
-    }
-
-    var it = std.mem.splitSequence(u8, input[0 .. input.len - 1], "\n");
-    while (it.next()) |line| {
-        var options = try std.ArrayList(u24).initCapacity(allocator, 8);
-
-        var options_it = std.mem.splitSequence(u8, line[5..], " ");
-        while (options_it.next()) |option| {
-            const value = ((@as(u24, option[0]) << 16) | (@as(u24, option[1]) << 8) | option[2]);
-            try options.append(allocator, value);
-        }
-
-        const start = ((@as(u24, line[0]) << 16) | (@as(u24, line[1]) << 8) | line[2]);
-        try graph.put(start, options);
     }
 
     var visited = std.AutoHashMap(u24, void).init(allocator);
