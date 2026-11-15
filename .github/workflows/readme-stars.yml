@@ -25,4 +25,4 @@ jobs:
                 readmeLocation: ${{ matrix.year }}/README.md
           - uses: stefanzweifel/git-auto-commit-action@v5
             with:
-              commit_message: "chore(${{ matrix.year }}): update readme progess"
+              commit_message: "(${{ matrix.year }}): update readme progess"
