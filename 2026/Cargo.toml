@@ -1,0 +1,10 @@
+[package]
+name = "advent_of_code"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.100"
+
+[lib]
+doctest = false
+
+[dependencies]
