@@ -1,4 +1,4 @@
-AOC_SESSION := `cat .adventofcode.session 2> /dev/null || cat ~/.adventofcode.session`
+AOC_SESSION := `cat ../.adventofcode.session`
 DATA_DIRECTORY := "src/data"
 YEAR := "2025"
 
