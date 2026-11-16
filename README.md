@@ -5,6 +5,7 @@
  - 2023 - [`C`](https://github.com/FineFindus/advent-of-code/blob/main/2023/)
  - 2024 - [`Rust`](https://github.com/FineFindus/advent-of-code/blob/main/2024/)
  - 2025 - [`Zig`](https://github.com/FineFindus/advent-of-code/blob/main/2025/)
+ - 2026 - [`Rust`](https://github.com/FineFindus/advent-of-code/blob/main/2026/)
 
 ## Setup
 
