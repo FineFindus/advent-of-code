@@ -8,9 +8,9 @@ default:
 
 # Download the input for the day
 download DAY:
-    curl "https://adventofcode.com/{{ YEAR }}/day/{{ DAY }}/input" -H "Cookie: session={{ AOC_SESSION }}" -o "{{ DATA_DIRECTORY }}/inputs/$(printf "%02d" {{ DAY }}).txt"
+    curl "https://adventofcode.com/{{ YEAR }}/day/$(printf "%d" {{ DAY }})/input" -H "Cookie: session={{ AOC_SESSION }}" -o "{{ DATA_DIRECTORY }}/inputs/{{ DAY }}.txt"
 
 # Setup the files for the day
 scaffold DAY: (download DAY)
-    touch {{ DATA_DIRECTORY }}/examples/$(printf "%02d" {{ DAY }}).txt
-    sed 's/DAY/$(printf "%02d" {{ DAY }})/g' src/template.rs > src/bin/$(printf "%02d" {{ DAY }}).rs
+    touch {{ DATA_DIRECTORY }}/examples/{{ DAY }}.txt
+    sed 's/DAY/{{ DAY }}/g' src/template.rs > src/bin/{{ DAY }}.rs
